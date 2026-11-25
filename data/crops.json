@@ -1,0 +1,70 @@
+{
+  "crops": [
+    {
+      "id": "ravanello",
+      "name": "Ravanello",
+      "family": "brassicacee",
+      "ideal_seasons": ["primavera", "autunno"],
+      "temp": {
+        "germination_min": 5,
+        "critical_min": 0,
+        "optimal_min": 12,
+        "optimal_max": 22,
+        "critical_max": 28
+      },
+      "growth_days": 4,
+      "multi_harvest": false,
+      "regrow_days": 0,
+      "water_need": "medium",
+      "soil_fertility_delta": -5,
+      "seed_price": 10,
+      "sell_price": 25,
+      "base_yield": 1,
+      "description": "Radice croccante e velocissima. Ama i climi miti di primavera e autunno."
+    },
+    {
+      "id": "pomodoro",
+      "name": "Pomodoro",
+      "family": "solanacee",
+      "ideal_seasons": ["estate"],
+      "temp": {
+        "germination_min": 14,
+        "critical_min": 6,
+        "optimal_min": 20,
+        "optimal_max": 30,
+        "critical_max": 38
+      },
+      "growth_days": 12,
+      "multi_harvest": true,
+      "regrow_days": 3,
+      "water_need": "high",
+      "soil_fertility_delta": -20,
+      "seed_price": 45,
+      "sell_price": 35,
+      "base_yield": 2,
+      "description": "Ortaggio estivo a raccolta scalare ogni 3 giorni. Soffre molto il gelo e il freddo."
+    },
+    {
+      "id": "cavolo_verza",
+      "name": "Cavolo Verza",
+      "family": "brassicacee",
+      "ideal_seasons": ["autunno", "inverno"],
+      "temp": {
+        "germination_min": 2,
+        "critical_min": -8,
+        "optimal_min": 4,
+        "optimal_max": 16,
+        "critical_max": 25
+      },
+      "growth_days": 14,
+      "multi_harvest": false,
+      "regrow_days": 0,
+      "water_need": "medium",
+      "soil_fertility_delta": -15,
+      "seed_price": 30,
+      "sell_price": 95,
+      "base_yield": 1,
+      "description": "Ortaggio invernale robusto: resiste fino a -8°C ma soffre il caldo estivo."
+    }
+  ]
+}

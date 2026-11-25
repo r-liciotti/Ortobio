@@ -1,0 +1,88 @@
+{
+  "version": "0.1.0",
+  "grid": {
+    "width": 10,
+    "height": 30,
+    "tile_size": 16
+  },
+  "calendar": {
+    "days_per_season": 28,
+    "seasons": ["primavera", "estate", "autunno", "inverno"],
+    "day_duration_seconds": 720.0,
+    "start_hour": 6,
+    "end_hour": 24
+  },
+  "energy": {
+    "max_energy": 100,
+    "costs": {
+      "spade": 4,
+      "rake": 2,
+      "water": 2,
+      "seed": 0,
+      "harvest": 0,
+      "inspect": 0
+    }
+  },
+  "economy": {
+    "starting_coins": 150
+  },
+  "soil": {
+    "default_fertility": 65.0,
+    "moisture_water_add": 65.0,
+    "moisture_rain_add": 55.0,
+    "moisture_evap_base": 22.0,
+    "moisture_dry_threshold": 25.0,
+    "moisture_waterlogged_threshold": 82.0,
+    "waterlogged_penalty_days": 2
+  },
+  "climate": {
+    "primavera": {
+      "label": "Primavera",
+      "day_min": 14,
+      "day_max": 22,
+      "night_min": 6,
+      "night_max": 12,
+      "rain_chance": 0.30,
+      "frost_chance": 0.12,
+      "heatwave_chance": 0.0,
+      "snow_chance": 0.0,
+      "tint": "#ffffff"
+    },
+    "estate": {
+      "label": "Estate",
+      "day_min": 25,
+      "day_max": 34,
+      "night_min": 16,
+      "night_max": 22,
+      "rain_chance": 0.12,
+      "frost_chance": 0.0,
+      "heatwave_chance": 0.18,
+      "snow_chance": 0.0,
+      "tint": "#fff5dc"
+    },
+    "autunno": {
+      "label": "Autunno",
+      "day_min": 12,
+      "day_max": 20,
+      "night_min": 5,
+      "night_max": 11,
+      "rain_chance": 0.35,
+      "frost_chance": 0.08,
+      "heatwave_chance": 0.0,
+      "snow_chance": 0.0,
+      "tint": "#f4dfbe"
+    },
+    "inverno": {
+      "label": "Inverno",
+      "day_min": 2,
+      "day_max": 9,
+      "night_min": -4,
+      "night_max": 3,
+      "rain_chance": 0.15,
+      "frost_chance": 0.45,
+      "heatwave_chance": 0.0,
+      "snow_chance": 0.28,
+      "tint": "#dbe8f5"
+    }
+  }
+}

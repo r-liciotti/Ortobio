@@ -1,0 +1,11 @@
+# Godot 4 local cache & exports
+.godot/
+*.translation
+*.import
+
+# Python / OS artifacts
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+builds/
