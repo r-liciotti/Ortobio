@@ -18,6 +18,8 @@ const CROP_ROWS := {
 	"ravanello": 0,
 	"pomodoro": 1,
 	"cavolo_verza": 2,
+	"piselli": 3,
+	"trifoglio": 4,
 }
 const ACTION_SHEET_ROWS := {
 	"spade": 1,
@@ -25,6 +27,8 @@ const ACTION_SHEET_ROWS := {
 	"water": 3,
 	"seed": 4,
 	"harvest": 5,
+	"compost": 6,
+	"probe": 7,
 }
 
 enum FarmerState {
@@ -40,6 +44,7 @@ var crops_tex: Texture2D
 var farmer_tex: Texture2D
 var selected_tile: Vector2i = Vector2i(-1, -1)
 var weather_type: String = "sole"
+var show_npk_overlay: bool = false
 
 var farmer_pos: Vector2 = Vector2(4.5 * TILE_SIZE, 2.5 * TILE_SIZE)
 var farmer_target: Vector2 = Vector2(4.5 * TILE_SIZE, 2.5 * TILE_SIZE)
@@ -56,6 +61,10 @@ var _particles: Array[Dictionary] = []
 var _floating_texts: Array[Dictionary] = []
 var _weather_drops: Array[Dictionary] = []
 var _anim_time: float = 0.0
+var _npk_sb_high: StyleBoxFlat
+var _npk_sb_mid: StyleBoxFlat
+var _npk_sb_low: StyleBoxFlat
+var _npk_sb_unknown: StyleBoxFlat
 
 
 func _ready() -> void:
@@ -65,6 +74,25 @@ func _ready() -> void:
 	crops_tex = _load_pixel_texture("res://assets/tiles/crops_atlas.png")
 	farmer_tex = _load_pixel_texture("res://assets/tiles/farmer_sheet.png")
 	_init_weather_drops()
+	_init_npk_styles()
+
+
+func _init_npk_styles() -> void:
+	_npk_sb_high = _make_overlay_sb(Color(0.24, 0.82, 0.34, 0.36))
+	_npk_sb_mid = _make_overlay_sb(Color(0.95, 0.78, 0.22, 0.40))
+	_npk_sb_low = _make_overlay_sb(Color(0.92, 0.28, 0.24, 0.46))
+	_npk_sb_unknown = _make_overlay_sb(Color(0.12, 0.14, 0.18, 0.26))
+
+
+func _make_overlay_sb(col: Color) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = col
+	sb.anti_aliasing = false
+	sb.corner_radius_top_left = 2
+	sb.corner_radius_top_right = 2
+	sb.corner_radius_bottom_left = 2
+	sb.corner_radius_bottom_right = 2
+	return sb
 
 
 func _load_pixel_texture(res_path: String) -> Texture2D:
@@ -322,6 +350,41 @@ func _draw() -> void:
 					draw_texture_rect_region(atlas_tex, dst, _tile_src(6, 0))
 				if s and e and not _is_tilled(x + 1, y + 1):
 					draw_texture_rect_region(atlas_tex, dst, _tile_src(7, 0))
+
+				if bool(cell.get("fertilized", false)):
+					draw_texture_rect_region(atlas_tex, dst, _tile_src(5, 1))
+
+	# Pass 1b: Optional N-P-K soil diagnostic overlay on tilled tiles
+	if show_npk_overlay:
+		if _npk_sb_high == null:
+			_init_npk_styles()
+		var overlay_font: Font = ThemeDB.fallback_font
+		for y in range(simulation.height):
+			for x in range(simulation.width):
+				var cell: Dictionary = simulation.get_cell(x, y)
+				if int(cell["soil_state"]) == GridSimulation.SoilState.INCOLTO:
+					continue
+				var dst := Rect2(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+				var inset := dst.grow(-1.0)
+				if bool(cell.get("npk_analyzed", false)):
+					var min_v: float = minf(float(cell["n"]), minf(float(cell["p"]), float(cell["k"])))
+					var sb_col: StyleBoxFlat = _npk_sb_high
+					if min_v < 35.0:
+						sb_col = _npk_sb_low
+					elif min_v < 65.0:
+						sb_col = _npk_sb_mid
+					draw_style_box(sb_col, inset)
+				else:
+					draw_style_box(_npk_sb_unknown, inset)
+					draw_string(
+						overlay_font,
+						Vector2(dst.position.x, dst.position.y + 11.0),
+						"?",
+						HORIZONTAL_ALIGNMENT_CENTER,
+						TILE_SIZE,
+						9,
+						Color(0.88, 0.92, 0.96, 0.88)
+					)
 
 	# Subtle queued-tile highlights so player sees pending drag targets immediately
 	if not _active_req.is_empty():

@@ -171,6 +171,13 @@ func _build_layout() -> void:
 	)
 	_tool_dock.tool_selected.connect(func(_tid: String): _play_sfx("tap", 1.1))
 	_tool_dock.harvest_all_pressed.connect(_on_harvest_all_pressed)
+	_tool_dock.npk_overlay_toggled.connect(func(enabled: bool) -> void:
+		_play_sfx("tap", 1.05 if enabled else 0.95)
+		_field_renderer.show_npk_overlay = enabled
+		_field_renderer.queue_redraw()
+		if enabled:
+			_show_toast("Vista N-P-K attiva (usa la Sonda sulle zolle '?')")
+	)
 	root_vbox.add_child(_tool_dock)
 
 	call_deferred("_recompute_field_scale")
@@ -296,16 +303,26 @@ func _handle_pointer_up(pos: Vector2) -> void:
 func _handle_explore_tap(tile: Vector2i) -> void:
 	if not simulation.is_valid(tile.x, tile.y):
 		return
-	var cell := simulation.get_cell(tile.x, tile.y)
+	var cell: Dictionary = simulation.get_cell(tile.x, tile.y)
 	var crop: Dictionary = cell["crop"]
 	if not crop.is_empty() and (bool(crop.get("harvest_ready", false)) or bool(crop.get("withered", false))):
-		var act_name := "harvest" if bool(crop.get("harvest_ready", false)) else "rake"
+		var crop_id: String = str(crop.get("crop_id", ""))
+		var crop_def: Dictionary = crops_db.get(crop_id, {})
+		var is_gm: bool = bool(crop_def.get("is_green_manure", false))
+		if bool(crop.get("harvest_ready", false)) and not bool(crop.get("withered", false)) and is_gm:
+			_field_renderer.selected_tile = tile
+			_field_renderer.queue_redraw()
+			_inspector.inspect_cell(cell, simulation, time_weather)
+			_play_sfx("tap")
+			_show_toast("Trifoglio maturo! Passa a Lavora -> Vanga per interrarlo (+N/P/K).")
+			return
+		var act_name: String = "harvest" if bool(crop.get("harvest_ready", false)) else "rake"
 		_field_renderer.enqueue_farmer_action({
 			"gx": tile.x,
 			"gy": tile.y,
 			"action": act_name,
 			"tool_id": "harvest_or_clear",
-			"crop_id": str(crop.get("crop_id", "")),
+			"crop_id": crop_id,
 		})
 		_inspector.visible = false
 		return
@@ -319,22 +336,31 @@ func _handle_explore_tap(tile: Vector2i) -> void:
 func _apply_active_tool(tile: Vector2i) -> void:
 	if not simulation.is_valid(tile.x, tile.y):
 		return
-	var tid := _tool_dock.current_tool
-	var cell := simulation.get_cell(tile.x, tile.y)
-	var s_state := int(cell["soil_state"])
+	var tid: String = _tool_dock.current_tool
+	var cell: Dictionary = simulation.get_cell(tile.x, tile.y)
+	var s_state: int = int(cell["soil_state"])
 	var crop_dict: Dictionary = cell["crop"]
 	var has_crop: bool = not crop_dict.is_empty()
 
 	# Pre-validate so farmer only walks to valid tiles and gives immediate feedback otherwise
 	if tid == "spade":
-		if has_crop or s_state != GridSimulation.SoilState.INCOLTO:
+		var can_till_incolto: bool = (not has_crop and s_state == GridSimulation.SoilState.INCOLTO)
+		var gm_cid: String = str(crop_dict.get("crop_id", ""))
+		var gm_def: Dictionary = crops_db.get(gm_cid, {})
+		var can_till_gm: bool = (
+			has_crop
+			and not bool(crop_dict.get("withered", false))
+			and bool(crop_dict.get("harvest_ready", false))
+			and bool(gm_def.get("is_green_manure", false))
+		)
+		if not can_till_incolto and not can_till_gm:
 			return
 	elif tid == "rake":
 		if has_crop or s_state != GridSimulation.SoilState.VANGATO:
 			if s_state == GridSimulation.SoilState.INCOLTO:
 				_show_toast("Prima dissoda la terra con la Vanga.")
 			return
-	elif tid == "water":
+	elif tid == "water" or tid == "compost" or tid == "probe":
 		if s_state == GridSimulation.SoilState.INCOLTO:
 			_show_toast("Incolto: lavora prima la zolla con la Vanga.")
 			return
@@ -345,8 +371,8 @@ func _apply_active_tool(tile: Vector2i) -> void:
 			_show_toast("Prepara il letto di semina col Rastrello.")
 			return
 
-	var act_type := "seed" if tid.begins_with("seed:") else tid
-	var cid := tid.substr(5) if tid.begins_with("seed:") else ""
+	var act_type: String = "seed" if tid.begins_with("seed:") else tid
+	var cid: String = tid.substr(5) if tid.begins_with("seed:") else ""
 	_field_renderer.enqueue_farmer_action({
 		"gx": tile.x,
 		"gy": tile.y,
@@ -358,37 +384,46 @@ func _apply_active_tool(tile: Vector2i) -> void:
 
 func _on_farmer_action_impact(req: Dictionary) -> void:
 	## Executes the actual simulation change right when the farmer arrives and strikes the tile.
-	var gx := int(req["gx"])
-	var gy := int(req["gy"])
-	var tid := str(req.get("tool_id", ""))
+	var gx: int = int(req["gx"])
+	var gy: int = int(req["gy"])
+	var tid: String = str(req.get("tool_id", ""))
 	if not simulation.is_valid(gx, gy):
 		return
 
 	if tid == "harvest_or_clear":
-		var res := simulation.clear_withered_or_harvest(gx, gy)
-		if bool(res.get("ok", false)):
-			if str(res.get("action", "")) == "harvested":
-				var earned := int(res["earned"])
-				var cname := str(res["crop_name"])
-				var qty := int(res["yield"])
-				_field_renderer.spawn_harvest_pop(gx, gy, str(res.get("crop_id", "")))
+		var h_res: Dictionary = simulation.clear_withered_or_harvest(gx, gy)
+		if bool(h_res.get("ok", false)):
+			if str(h_res.get("action", "")) == "harvested":
+				var earned: int = int(h_res["earned"])
+				var cname: String = str(h_res["crop_name"])
+				var qty: int = int(h_res["yield"])
+				_field_renderer.spawn_harvest_pop(gx, gy, str(h_res.get("crop_id", "")))
 				_field_renderer.spawn_action_particles(gx, gy, Color(0.98, 0.85, 0.30), 8)
 				_field_renderer.spawn_floating_text(gx, gy, "+%d €" % earned, Color(1.0, 0.90, 0.32))
 				_play_sfx("harvest")
-				_show_toast("Raccolto %dx %s (+%d €)!" % [qty, cname, earned])
+				_show_toast("Raccolti %dx %s (+%d €)!" % [qty, cname, earned])
 			else:
 				_field_renderer.spawn_action_particles(gx, gy, Color(0.60, 0.45, 0.30), 6)
 				_play_sfx("rake")
 				_show_toast("Pianta secca rimossa.")
 			_sync_all_ui()
+		elif str(h_res.get("reason", "")) == "use_spade_green_manure":
+			_show_toast("Trifoglio maturo! Passa a Lavora -> Vanga per interrarlo (+N/P/K).")
 		return
 
 	var res: Dictionary = {}
 	if tid == "spade":
 		res = simulation.apply_spade(gx, gy)
 		if bool(res.get("ok", false)):
-			_field_renderer.spawn_action_particles(gx, gy, Color(0.62, 0.44, 0.28), 6)
-			_play_sfx("spade", randf_range(0.94, 1.06))
+			if str(res.get("action", "")) == "green_manure_tilled":
+				_field_renderer.spawn_action_particles(gx, gy, Color(0.38, 0.84, 0.36), 6)
+				_field_renderer.spawn_action_particles(gx, gy, Color(0.56, 0.38, 0.22), 5)
+				_field_renderer.spawn_floating_text(gx, gy, "+N/P/K!", Color(0.45, 0.96, 0.45))
+				_play_sfx("spade", randf_range(0.94, 1.06))
+				_show_toast("Trifoglio interrato! Suolo rigenerato (+N/P/K).")
+			else:
+				_field_renderer.spawn_action_particles(gx, gy, Color(0.62, 0.44, 0.28), 6)
+				_play_sfx("spade", randf_range(0.94, 1.06))
 	elif tid == "rake":
 		res = simulation.apply_rake(gx, gy)
 		if bool(res.get("ok", false)):
@@ -399,8 +434,26 @@ func _on_farmer_action_impact(req: Dictionary) -> void:
 		if bool(res.get("ok", false)):
 			_field_renderer.spawn_action_particles(gx, gy, Color(0.35, 0.70, 0.95), 6)
 			_play_sfx("water", randf_range(0.95, 1.05))
+	elif tid == "compost":
+		res = simulation.apply_compost(gx, gy)
+		if bool(res.get("ok", false)):
+			_field_renderer.spawn_action_particles(gx, gy, Color(0.38, 0.25, 0.16), 5)
+			_field_renderer.spawn_action_particles(gx, gy, Color(0.42, 0.80, 0.36), 4)
+			_field_renderer.spawn_floating_text(gx, gy, "+Compost", Color(0.62, 0.94, 0.52))
+			_play_sfx("rake", randf_range(0.94, 1.06))
+	elif tid == "probe":
+		res = simulation.apply_probe(gx, gy)
+		if bool(res.get("ok", false)):
+			var n_val: int = int(round(float(res["n"])))
+			var p_val: int = int(round(float(res["p"])))
+			var k_val: int = int(round(float(res["k"])))
+			_field_renderer.spawn_action_particles(gx, gy, Color(0.32, 0.88, 0.94), 5)
+			_field_renderer.spawn_action_particles(gx, gy, Color(0.42, 0.86, 0.48), 4)
+			_field_renderer.spawn_floating_text(gx, gy, "N%d P%d K%d" % [n_val, p_val, k_val], Color(0.55, 0.96, 0.98))
+			_play_sfx("tap", 1.25)
+			_show_toast("Analisi zolla: N %d · P %d · K %d" % [n_val, p_val, k_val])
 	elif tid.begins_with("seed:"):
-		var crop_id := tid.substr(5)
+		var crop_id: String = tid.substr(5)
 		res = simulation.plant_seed(gx, gy, crop_id)
 		if bool(res.get("ok", false)):
 			_field_renderer.spawn_action_particles(gx, gy, Color(0.82, 0.78, 0.45), 4)
@@ -450,13 +503,20 @@ func _on_season_cycle_pressed() -> void:
 	])
 
 
+func _is_edible_harvest_ready(crop: Dictionary) -> bool:
+	if crop.is_empty() or bool(crop.get("withered", false)) or not bool(crop.get("harvest_ready", false)):
+		return false
+	var def: Dictionary = crops_db.get(str(crop.get("crop_id", "")), {})
+	return not bool(def.get("is_green_manure", false))
+
+
 func _on_harvest_all_pressed() -> void:
-	var queued := 0
+	var queued: int = 0
 	for y in range(simulation.height):
 		for x in range(simulation.width):
-			var cell := simulation.get_cell(x, y)
+			var cell: Dictionary = simulation.get_cell(x, y)
 			var crop: Dictionary = cell["crop"]
-			if not crop.is_empty() and bool(crop.get("harvest_ready", false)):
+			if _is_edible_harvest_ready(crop):
 				_field_renderer.enqueue_farmer_action({
 					"gx": x,
 					"gy": y,
@@ -472,10 +532,10 @@ func _on_harvest_all_pressed() -> void:
 
 func _sync_all_ui() -> void:
 	_top_bar.update_state(time_weather, simulation)
-	var ready_count := 0
+	var ready_count: int = 0
 	for cell in simulation.cells:
 		var crop: Dictionary = cell["crop"]
-		if not crop.is_empty() and bool(crop.get("harvest_ready", false)):
+		if _is_edible_harvest_ready(crop):
 			ready_count += 1
 	_tool_dock.update_ready_count(ready_count)
 	_field_renderer.weather_type = time_weather.weather_type

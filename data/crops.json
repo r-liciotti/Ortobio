@@ -16,10 +16,13 @@
       "multi_harvest": false,
       "regrow_days": 0,
       "water_need": "medium",
+      "primary_element": "p",
+      "npk_delta": { "n": -3, "p": -11, "k": -3 },
       "soil_fertility_delta": -5,
       "seed_price": 10,
-      "sell_price": 25,
-      "base_yield": 1,
+      "sell_price": 14,
+      "base_yield": 2,
+      "is_green_manure": false,
       "description": "Radice croccante e velocissima. Ama i climi miti di primavera e autunno."
     },
     {
@@ -38,10 +41,13 @@
       "multi_harvest": true,
       "regrow_days": 3,
       "water_need": "high",
+      "primary_element": "k",
+      "npk_delta": { "n": -4, "p": -4, "k": -13 },
       "soil_fertility_delta": -20,
       "seed_price": 45,
-      "sell_price": 35,
-      "base_yield": 2,
+      "sell_price": 15,
+      "base_yield": 3,
+      "is_green_manure": false,
       "description": "Ortaggio estivo a raccolta scalare ogni 3 giorni. Soffre molto il gelo e il freddo."
     },
     {
@@ -60,11 +66,62 @@
       "multi_harvest": false,
       "regrow_days": 0,
       "water_need": "medium",
+      "primary_element": "n",
+      "npk_delta": { "n": -13, "p": -3, "k": -3 },
       "soil_fertility_delta": -15,
       "seed_price": 30,
-      "sell_price": 95,
-      "base_yield": 1,
+      "sell_price": 45,
+      "base_yield": 2,
+      "is_green_manure": false,
       "description": "Ortaggio invernale robusto: resiste fino a -8°C ma soffre il caldo estivo."
+    },
+    {
+      "id": "piselli",
+      "name": "Piselli",
+      "family": "legumi",
+      "ideal_seasons": ["primavera", "autunno"],
+      "temp": {
+        "germination_min": 5,
+        "critical_min": 0,
+        "optimal_min": 12,
+        "optimal_max": 20,
+        "critical_max": 30
+      },
+      "growth_days": 8,
+      "multi_harvest": true,
+      "regrow_days": 3,
+      "water_need": "medium",
+      "primary_element": "p",
+      "npk_delta": { "n": 18, "p": -5, "k": -4 },
+      "seed_price": 25,
+      "sell_price": 12,
+      "base_yield": 3,
+      "is_green_manure": false,
+      "description": "Legume azotofissatore: rigenera l'Azoto (N) del terreno mentre produce baccelli."
+    },
+    {
+      "id": "trifoglio",
+      "name": "Trifoglio",
+      "family": "sovescio",
+      "ideal_seasons": ["primavera", "estate", "autunno"],
+      "temp": {
+        "germination_min": 4,
+        "critical_min": -5,
+        "optimal_min": 8,
+        "optimal_max": 26,
+        "critical_max": 38
+      },
+      "growth_days": 3,
+      "multi_harvest": false,
+      "regrow_days": 0,
+      "water_need": "low",
+      "primary_element": "none",
+      "npk_delta": { "n": 32, "p": 16, "k": 14 },
+      "seed_price": 8,
+      "sell_price": 0,
+      "base_yield": 0,
+      "is_green_manure": true,
+      "description": "Concime verde (sovescio): cresce in 3 giorni. Interralo da maturo con la Vanga per rigenerare N, P e K!"
     }
   ]
 }

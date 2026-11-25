@@ -34,20 +34,59 @@ func _init(balance_config: Dictionary = {}, crops: Dictionary = {}) -> void:
 
 func _init_cells() -> void:
 	cells.clear()
-	var default_fert := float(config.get("soil", {}).get("default_fertility", 65.0))
+	var soil_cfg: Dictionary = config.get("soil", {})
+	var default_n := float(soil_cfg.get("default_n", 80.0))
+	var default_p := float(soil_cfg.get("default_p", 80.0))
+	var default_k := float(soil_cfg.get("default_k", 80.0))
 	for y in range(height):
 		for x in range(width):
 			var variant := (x * 7 + y * 13) % 3
-			cells.append({
+			var cell: Dictionary = {
 				"x": x,
 				"y": y,
 				"soil_state": SoilState.INCOLTO,
 				"moisture": 20.0,
-				"fertility": default_fert,
+				"n": default_n,
+				"p": default_p,
+				"k": default_k,
+				"npk_analyzed": false,
+				"fertility": 80.0,
+				"fertilized": false,
 				"waterlogged_days": 0,
 				"grass_variant": variant,
 				"crop": {},
-			})
+			}
+			_sync_fertility(cell)
+			cells.append(cell)
+
+
+func _sync_fertility(cell: Dictionary) -> void:
+	var n_val := float(cell.get("n", 80.0))
+	var p_val := float(cell.get("p", 80.0))
+	var k_val := float(cell.get("k", 80.0))
+	cell["fertility"] = (n_val + p_val + k_val) / 3.0
+
+
+func _apply_npk_delta(cell: Dictionary, delta: Dictionary, min_val: float = 0.0, max_val: float = 100.0) -> void:
+	cell["n"] = clampf(float(cell["n"]) + float(delta.get("n", 0.0)), min_val, max_val)
+	cell["p"] = clampf(float(cell["p"]) + float(delta.get("p", 0.0)), min_val, max_val)
+	cell["k"] = clampf(float(cell["k"]) + float(delta.get("k", 0.0)), min_val, max_val)
+	_sync_fertility(cell)
+
+
+func get_soil_nutrient_factor(cell: Dictionary, crop_def: Dictionary) -> float:
+	var raw_primary: Variant = crop_def.get("primary_element", "none")
+	var primary := "none" if raw_primary == null else str(raw_primary).strip_edges().to_lower()
+	if primary.is_empty() or primary == "none":
+		return 1.0
+	if primary != "n" and primary != "p" and primary != "k":
+		return 1.0
+	var val := float(cell.get(primary, 80.0))
+	if val < 30.0:
+		return 0.55
+	if val < 65.0:
+		return 0.90
+	return 1.15
 
 
 func is_valid(x: int, y: int) -> bool:
@@ -61,8 +100,23 @@ func get_cell(x: int, y: int) -> Dictionary:
 
 
 func get_energy_cost(action_key: String) -> int:
-	var costs: Dictionary = config.get("energy", {}).get("costs", {})
-	return int(costs.get(action_key, 0))
+	var energy_cfg: Dictionary = config.get("energy", {})
+	var costs: Dictionary = energy_cfg.get("costs", {})
+	if costs.has(action_key):
+		return int(costs[action_key])
+	match action_key:
+		"spade":
+			return 4
+		"rake":
+			return 2
+		"water":
+			return 2
+		"compost":
+			return 2
+		"probe":
+			return 1
+		_:
+			return 0
 
 
 func _consume_energy(cost: int) -> bool:
@@ -78,7 +132,26 @@ func apply_spade(x: int, y: int) -> Dictionary:
 	if not is_valid(x, y):
 		return {"ok": false, "reason": "out_of_bounds"}
 	var cell := get_cell(x, y)
-	if not cell["crop"].is_empty():
+	var crop: Dictionary = cell["crop"]
+	if not crop.is_empty():
+		var crop_id := str(crop.get("crop_id", ""))
+		var crop_def: Dictionary = crops_db.get(crop_id, {})
+		var is_gm := bool(crop_def.get("is_green_manure", false))
+		if is_gm and bool(crop.get("harvest_ready", false)) and not bool(crop.get("withered", false)):
+			var gm_cost := get_energy_cost("spade")
+			if not _consume_energy(gm_cost):
+				return {"ok": false, "reason": "no_energy"}
+			var npk_delta: Dictionary = crop_def.get("npk_delta", {})
+			_apply_npk_delta(cell, npk_delta, 0.0, 100.0)
+			cell["fertilized"] = true
+			cell["crop"] = {}
+			cell["soil_state"] = SoilState.RASTRELLATO
+			return {
+				"ok": true,
+				"action": "green_manure_tilled",
+				"energy_cost": gm_cost,
+				"crop_id": crop_id,
+			}
 		return {"ok": false, "reason": "crop_present"}
 	if int(cell["soil_state"]) != SoilState.INCOLTO:
 		return {"ok": false, "reason": "already_tilled"}
@@ -116,6 +189,45 @@ func apply_water(x: int, y: int, weather_type: String = "sole") -> Dictionary:
 	var add_amt := float(config.get("soil", {}).get("moisture_water_add", 65.0))
 	cell["moisture"] = clampf(float(cell["moisture"]) + add_amt, 0.0, 100.0)
 	return {"ok": true, "energy_cost": cost}
+
+
+func apply_compost(x: int, y: int) -> Dictionary:
+	if not is_valid(x, y):
+		return {"ok": false, "reason": "out_of_bounds"}
+	var cell := get_cell(x, y)
+	if int(cell["soil_state"]) == SoilState.INCOLTO:
+		return {"ok": false, "reason": "untilled"}
+	var cost := get_energy_cost("compost")
+	if not _consume_energy(cost):
+		return {"ok": false, "reason": "no_energy"}
+	var soil_cfg: Dictionary = config.get("soil", {})
+	var default_compost: Dictionary = {"n": 22.0, "p": 18.0, "k": 18.0}
+	var delta: Dictionary = soil_cfg.get("compost_delta", default_compost)
+	if delta.is_empty():
+		delta = default_compost
+	_apply_npk_delta(cell, delta, 0.0, 100.0)
+	cell["fertilized"] = true
+	return {"ok": true, "energy_cost": cost}
+
+
+func apply_probe(x: int, y: int) -> Dictionary:
+	## Sonda Analisi Suolo: reveals N-P-K values on a tilled cell.
+	if not is_valid(x, y):
+		return {"ok": false, "reason": "out_of_bounds"}
+	var cell := get_cell(x, y)
+	if int(cell["soil_state"]) == SoilState.INCOLTO:
+		return {"ok": false, "reason": "untilled"}
+	var cost := get_energy_cost("probe")
+	if not _consume_energy(cost):
+		return {"ok": false, "reason": "no_energy"}
+	cell["npk_analyzed"] = true
+	return {
+		"ok": true,
+		"energy_cost": cost,
+		"n": float(cell["n"]),
+		"p": float(cell["p"]),
+		"k": float(cell["k"]),
+	}
 
 
 func plant_seed(x: int, y: int, crop_id: String) -> Dictionary:
@@ -157,19 +269,21 @@ func clear_withered_or_harvest(x: int, y: int) -> Dictionary:
 		return {"ok": false, "reason": "not_ready"}
 
 	var crop_id := str(crop["crop_id"])
-	var def: Dictionary = crops_db[crop_id]
-	var base_yield := int(def.get("base_yield", 1))
+	var def: Dictionary = crops_db.get(crop_id, {})
+	if bool(def.get("is_green_manure", false)):
+		return {"ok": false, "reason": "use_spade_green_manure"}
+
+	var base_yield := int(def.get("base_yield", 2))
+	var nutr_f := get_soil_nutrient_factor(cell, def)
 	var total_days := maxi(1, int(crop.get("days_alive", 1)))
 	var off_ratio := float(crop.get("off_season_days", 0)) / float(total_days)
-	var yield_mult := 0.65 if off_ratio > 0.35 else 1.0
-	var actual_yield := maxi(1, int(round(float(base_yield) * yield_mult)))
-	var quality := "Scarsa" if float(crop.get("health", 100.0)) < 75.0 or off_ratio > 0.35 else "Standard"
-	var price_mult := 0.7 if quality == "Scarsa" else 1.0
-	var earned := int(round(float(def.get("sell_price", 10)) * float(actual_yield) * price_mult))
+	var mult := nutr_f * (0.75 if off_ratio > 0.35 else 1.0)
+	var actual_yield := maxi(1, int(round(float(base_yield) * mult)))
+	var earned := int(def.get("sell_price", 10)) * actual_yield
 	coins += earned
 
-	var fert_delta := float(def.get("soil_fertility_delta", -10))
-	cell["fertility"] = clampf(float(cell["fertility"]) + fert_delta, 10.0, 100.0)
+	var npk_delta: Dictionary = def.get("npk_delta", {})
+	_apply_npk_delta(cell, npk_delta, 5.0, 100.0)
 
 	if bool(def.get("multi_harvest", false)):
 		var g_days := float(def.get("growth_days", 12))
@@ -180,14 +294,19 @@ func clear_withered_or_harvest(x: int, y: int) -> Dictionary:
 	else:
 		cell["crop"] = {}
 
+	if float(npk_delta.get("n", 0.0)) > 0.0:
+		cell["fertilized"] = true
+	else:
+		cell["fertilized"] = false
+
 	return {
 		"ok": true,
 		"action": "harvested",
 		"crop_id": crop_id,
 		"crop_name": str(def.get("name", crop_id)),
 		"yield": actual_yield,
-		"quality": quality,
 		"earned": earned,
+		"npk_delta": npk_delta,
 	}
 
 
@@ -219,6 +338,7 @@ func simulate_day_step(weather: Dictionary) -> Dictionary:
 	var rain_add := float(soil_cfg.get("moisture_rain_add", 55.0))
 	var evap_base := float(soil_cfg.get("moisture_evap_base", 22.0))
 	var wl_penalty_days := int(soil_cfg.get("waterlogged_penalty_days", 2))
+	var rest_regen := float(soil_cfg.get("rest_regen_per_day", 0.5))
 
 	var w_type := str(weather.get("weather_type", "sole"))
 	var t_max := float(weather.get("temp_max", 20.0))
@@ -251,7 +371,20 @@ func simulate_day_step(weather: Dictionary) -> Dictionary:
 			cell["waterlogged_days"] = 0
 
 		var crop: Dictionary = cell["crop"]
-		if crop.is_empty() or bool(crop.get("withered", false)):
+		if crop.is_empty():
+			var cur_n := float(cell["n"])
+			var cur_p := float(cell["p"])
+			var cur_k := float(cell["k"])
+			if cur_n < 80.0 or cur_p < 80.0 or cur_k < 80.0:
+				if cur_n < 80.0:
+					cell["n"] = minf(80.0, cur_n + rest_regen)
+				if cur_p < 80.0:
+					cell["p"] = minf(80.0, cur_p + rest_regen)
+				if cur_k < 80.0:
+					cell["k"] = minf(80.0, cur_k + rest_regen)
+				_sync_fertility(cell)
+			continue
+		if bool(crop.get("withered", false)):
 			continue
 
 		var crop_def: Dictionary = crops_db.get(str(crop["crop_id"]), {})
@@ -276,12 +409,7 @@ func simulate_day_step(weather: Dictionary) -> Dictionary:
 		elif int(cell["waterlogged_days"]) >= wl_penalty_days:
 			f_water = 0.6
 
-		var fert := float(cell["fertility"])
-		var f_soil := 1.0
-		if fert < 35.0:
-			f_soil = 0.6
-		elif fert > 75.0:
-			f_soil = 1.15
+		var f_soil := get_soil_nutrient_factor(cell, crop_def)
 
 		if thermal_status == "frost":
 			crop["health"] = maxf(0.0, float(crop["health"]) - 25.0)

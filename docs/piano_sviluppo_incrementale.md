@@ -54,9 +54,11 @@ flowchart LR
 
 ## Fase C — Espansione Agricola, Stagioni & Fattoria
 
-### `v0.4a` — Bonifica del Campo, Piante Compagne & Polish Stagioni
+### `v0.4a` — Bonifica del Campo, Piante Compagne & Polish Visivo/UI (Stagioni, Atmosfera, Menu)
 - Bonifica progressiva delle fasce incolte del campo (erba alta, rami, pietre → **Legna, Pietra, Fibre**).
-- Espansione catalogo a **10–12 colture** (incluse 1–2 **Piante Compagne** leggere e facoltative) + **stagioni visivamente molto più riconoscibili** (fiori primaverili, foglie cadenti in autunno, neve/brina in inverno).
+- Espansione catalogo a **10–12 colture** (incluse 1–2 **Piante Compagne** leggere e facoltative).
+- **Polish Atmosfera & Stagioni:** stagioni più riconoscibili visivamente (fiori primaverili, foglie cadenti in autunno, neve/brina in inverno), **animazioni del vento** sulle piante, **ombre delle nuvole** che scorrono sul campo e **ombre orientate dal sole** che cambiano dall'alba al tramonto per percepire lo scorrere del tempo.
+- **Restyling Menu Inferiore (`ToolDock`):** interfaccia più curata visivamente e più comoda col pollice (es. tab/categorie pulite Attrezzi / Semi / Concimi / Costruisci).
 
 ### `v0.4b` — Arboricoltura (Melo & Ulivo) & Traguardi della Valle (Bundle)
 - Primi alberi `2×2` (**Melo**, **Ulivo**) con potatura invernale, fioritura e raccolta.

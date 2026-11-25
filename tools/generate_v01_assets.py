@@ -81,6 +81,10 @@ P = {
     "st0": (118, 86, 48, 255),
     "st1": (168, 132, 74, 255),
     "st2": (204, 172, 106, 255),
+    # Pink blossoms (trifoglio)
+    "pk0": (186, 86, 124, 255),
+    "pk1": (232, 138, 174, 255),
+    "pk2": (252, 206, 224, 255),
 }
 
 
@@ -658,10 +662,205 @@ def make_crop_3d(crop_id, stage):
             ], w, h)
             stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
 
+    elif crop_id == "piselli":
+        if stage == 2:
+            draw_oval_shadow(px, w, h, 7.5, 16.5, 4.4, 1.6)
+            sprite = parse_sprite([
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . k k . . k k . . . . .",
+                ". . . . k b3 b2 k k b2 b3 k . . .",
+                ". . . . . k b1 k k b1 k . . . . .",
+                ". . . . k k k b1 b2 k k . . . . .",
+                ". . . k g5 g4 k b1 g4 k . . . . . .",
+                ". . . k g3 g2 g3 b1 g2 g1 k . . .",
+                ". . . . k g1 b1 g2 g1 b0 k . . .",
+                ". . . k g4 g3 b1 g3 g2 b0 k . . .",
+                ". . . k g2 g1 b0 g1 g0 k . . . .",
+                ". . . . k g0 b0 k b0 k . . . . .",
+                ". . . . . k b0 k k b0 k . . . . .",
+                ". . . . . k b0 k k b0 k . . . . .",
+                ". . . . . . k . . . k . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+        elif stage == 3:
+            # Climbing pea vine on bamboo trellis with delicate white blossoms
+            draw_oval_shadow(px, w, h, 7.5, 16.7, 5.0, 1.8)
+            sprite = parse_sprite([
+                ". . . . . k k . . k k . . . . .",
+                ". . . . k b3 b2 k k b2 b3 k . . .",
+                ". . . . . k b1 g4 g3 b1 k . . . .",
+                ". . . . k g4 g3 g2 g1 g2 k . . .",
+                ". . . k g3 wh g1 b1 wh g3 k . . .",
+                ". . . k wh y1 g0 g2 y1 wh g1 k . .",
+                ". . . . k g1 g3 g1 b1 g0 k . . .",
+                ". . . k g4 g2 g0 g3 g2 wh k . . .",
+                ". . . k g2 g1 wh y1 g1 y1 k . . .",
+                ". . . . k g0 g2 g0 b1 g0 k . . .",
+                ". . . k g3 g2 b1 g2 g1 k . . . .",
+                ". . . . k g1 b0 g1 g0 k . . . .",
+                ". . . . . k b0 g0 b0 k . . . . .",
+                ". . . . . k b0 k k b0 k . . . . .",
+                ". . . . . k b0 k k b0 k . . . . .",
+                ". . . . . . k . . . k . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+        else:
+            # Mature 3/4 pea vine heavy with plump bright green pods
+            draw_oval_shadow(px, w, h, 7.5, 16.8, 5.4, 1.9)
+            sprite = parse_sprite([
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . k k . . k k . . . . .",
+                ". . . . k b3 b2 k k b2 b3 k . . .",
+                ". . . . k g4 b1 g3 g2 b1 k . . .",
+                ". . . k g3 g2 g1 wh g1 g3 k . . .",
+                ". . k g4 g2 g1 g2 y1 g4 g2 k . .",
+                ". . k g1 c3 g5 k g0 k c3 g5 k . .",
+                ". . k g2 g4 g1 k g2 g4 g1 k . . .",
+                ". . . k g4 g1 g0 g1 g2 g4 g1 k . .",
+                ". . k g3 g0 k c3 g5 k g1 g0 k . .",
+                ". . k c3 g5 k g4 g1 k c3 g5 k . .",
+                ". . . k g4 g1 g0 b1 k g4 g1 k . .",
+                ". . . . k g1 b0 g1 g0 g1 k . . .",
+                ". . . . . k b0 g0 b0 k k . . . .",
+                ". . . . . k b0 k k b0 k . . . . .",
+                ". . . . . . k . . . k . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+
+    elif crop_id == "trifoglio":
+        if stage == 2:
+            draw_oval_shadow(px, w, h, 7.5, 15.6, 4.8, 1.6)
+            sprite = parse_sprite([
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . k k . k k . . . . .",
+                ". . . . k k g4 g3 k g3 k . . . .",
+                ". . . k g4 c3 g2 g4 c3 g2 k . .",
+                ". . . k g2 g1 g0 g2 g1 g0 k . .",
+                ". . . . k g1 g2 g3 g1 g0 k . . .",
+                ". . . . . k g0 g1 g0 k k . . . .",
+                ". . . . . . k k k k . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+        elif stage == 3:
+            draw_oval_shadow(px, w, h, 7.5, 15.8, 5.8, 1.9)
+            sprite = parse_sprite([
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . k k . . k k . . . . .",
+                ". . . . k g4 g3 k g4 g3 k . . .",
+                ". . k k g3 c3 g2 g3 c3 g2 k k .",
+                ". k g4 g3 g1 g0 g2 g1 g0 g3 g2 k",
+                ". k g2 c3 g2 g3 g4 c3 g2 g1 g0 k",
+                ". k g1 g0 g1 g2 g1 g0 g1 g2 g0 k",
+                ". . k g0 g2 g1 g0 g2 g1 g0 k k .",
+                ". . . k g0 g1 g0 g0 g1 g0 k . .",
+                ". . . . k k k k k k k k k . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+        else:
+            # Mature lush 3/4 clover cushion with tiny pink/white blossoms
+            draw_oval_shadow(px, w, h, 7.5, 16.0, 6.4, 2.0)
+            sprite = parse_sprite([
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . k k . . . . . . . .",
+                ". . . . . k pk2 wh k . k k . . .",
+                ". . . k k k pk1 pk0 k k wh pk2 k",
+                ". . k g4 g3 g2 g1 g3 g4 pk1 pk0 k",
+                ". k g4 c3 g2 g4 c3 g2 g3 g2 g1 k",
+                ". k g2 g1 pk2 wh g1 g0 g4 c3 g0 k",
+                ". k g3 g2 pk1 pk0 g3 g2 g1 g0 g0 k",
+                ". k g1 c3 g1 g0 g4 c3 g1 pk2 wh k",
+                ". . k g0 g2 g1 g2 g1 g0 pk1 pk0 k",
+                ". . . k g0 g1 g0 g0 g1 g0 k k .",
+                ". . . . k k k k k k k k k . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+                ". . . . . . . . . . . . . . . .",
+            ], w, h)
+            stamp(px, w, 0, 0, sprite, w, h, alpha_blend=True)
+
     return px
 
 
 def make_tool_icon(tool_id):
+    if tool_id == "compost":
+        return parse_sprite([
+            ". . . . . . . . . . . . . . . .",
+            ". . . . . . . k k k k . . . . .",
+            ". . . . . . k sw2 sw1 sw0 k . . .",
+            ". . . . . k sw2 sd3 sw1 sw0 k . .",
+            ". . . . . k b3 b2 b2 b1 b0 k . .",
+            ". . . . . . k k b1 b0 k k . . .",
+            ". . . . . k b3 b2 b2 b1 b0 k . .",
+            ". . . . k b3 b2 g4 g3 b2 b1 k .",
+            ". . . . k b2 b2 g3 g2 b1 b0 k .",
+            ". . . . k b2 b1 g2 b1 b1 b0 k .",
+            ". . . k k b1 b1 b1 b0 b0 b0 k .",
+            ". . k sw2 sw1 k b1 b0 b0 b0 k .",
+            ". k sw2 sw1 sw0 sw0 k k k k k . .",
+            ". . k k k k k . . . . . . . . .",
+            ". . . . . . . . . . . . . . . .",
+            ". . . . . . . . . . . . . . . .",
+        ])
+    if tool_id == "probe":
+        return parse_sprite([
+            ". . . . . . . . . . . . . . . .",
+            ". . . . . . . . . k k k . . . .",
+            ". . . . . . . . k s2 s1 k k . .",
+            ". . . . . . . . . k s1 s2 s1 k .",
+            ". . . . . . . . . k s1 s0 k k .",
+            ". . . . . . . . k s2 s0 k . . .",
+            ". . . . . . . k s2 s1 k . . . .",
+            ". . . . . . k s2 s1 k . . . . .",
+            ". . . . . k s2 s0 k . . . . . .",
+            ". . . . k s2 s0 k . . . . . . .",
+            ". . . k g4 g3 k . . . . . . . .",
+            ". . k y1 g4 k . . . . . . . . .",
+            ". . k y1 k . . . . . . . . . . .",
+            ". . . k . . . . . . . . . . . .",
+            ". . . . . . . . . . . . . . . .",
+            ". . . . . . . . . . . . . . . .",
+        ])
     if tool_id == "spade":
         return parse_sprite([
             ". . . . . . . . . . . k k . . .",
@@ -829,6 +1028,33 @@ def make_status_icon(icon_id):
     return px
 
 
+def make_fertilized_overlay():
+    """Cozy humus/compost speckles staying inside x=2..13, y=2..13."""
+    px = new_canvas(16, 16)
+    speckles = [
+        # Dark organic humus crumbs
+        (3, 3, "sw0"), (4, 3, "sd0"),
+        (11, 4, "sd0"), (12, 4, "sw0"),
+        (8, 6, "sw0"), (9, 6, "sd0"),
+        (2, 8, "sd0"),
+        (4, 10, "sw0"), (5, 11, "sd0"),
+        (12, 10, "sw0"), (13, 10, "sd0"),
+        (9, 12, "sw0"),
+        # Warm organic bits
+        (10, 3, "sd4"),
+        (5, 5, "sd4"),
+        (3, 8, "sd4"),
+        (7, 9, "sd4"),
+        (10, 12, "sd4"),
+        # Tiny natural green-compost flecks
+        (3, 6, "g1"),
+        (11, 8, "g3"),
+    ]
+    for x, y, tok in speckles:
+        px[y * 16 + x] = P[tok]
+    return px
+
+
 def make_farmer_frame(frame_idx):
     """
     Generates a 16x22 3/4-perspective cozy farmer sprite (straw hat, red shirt, blue overalls).
@@ -950,7 +1176,7 @@ def make_farmer_frame(frame_idx):
 def generate_all():
     # 1. field_atlas.png (8 cols x 3 rows of 16x16 = 128 x 48)
     # Row 0: 4 organic grass variants + 4 inner-corner grass bevel patches (NW, NE, SW, SE)
-    # Row 1: status icons (drop, frost, heat, sparkle, highlight)
+    # Row 1: status icons (drop, frost, heat, sparkle, highlight, fertilized overlay)
     # Row 2: tool icons (spade, rake, water, inspect)
     aw, ah = 8 * 16, 3 * 16
     atlas = new_canvas(aw, ah)
@@ -961,6 +1187,7 @@ def generate_all():
 
     for i, icon in enumerate(["drop", "frost", "heat", "sparkle", "highlight"]):
         stamp(atlas, aw, i * 16, 16, make_status_icon(icon), 16, 16)
+    stamp(atlas, aw, 5 * 16, 16, make_fertilized_overlay(), 16, 16)
     for i, tool in enumerate(["spade", "rake", "water", "inspect"]):
         stamp(atlas, aw, i * 16, 32, make_tool_icon(tool), 16, 16)
     write_png(os.path.join(TILES_DIR, "field_atlas.png"), aw, ah, atlas)
@@ -986,22 +1213,23 @@ def generate_all():
             stamp(soil_atlas, sw, mask * 16, r_idx * 16, cell_px, 16, 16)
     write_png(os.path.join(TILES_DIR, "soil_autotile.png"), sw, sh, soil_atlas)
 
-    # 3. crops_atlas.png (6 cols x 3 rows of 16x20 = 96 x 60)
-    cw, ch = 6 * 16, 3 * 20
+    # 3. crops_atlas.png (6 cols x 5 rows of 16x20 = 96 x 100)
+    cw, ch = 6 * 16, 5 * 20
     crops_atlas = new_canvas(cw, ch)
-    crop_ids = ["ravanello", "pomodoro", "cavolo_verza"]
+    crop_ids = ["ravanello", "pomodoro", "cavolo_verza", "piselli", "trifoglio"]
     for r_idx, cid in enumerate(crop_ids):
         for st in range(6):
             c_px = make_crop_3d(cid, st)
             stamp(crops_atlas, cw, st * 16, r_idx * 20, c_px, 16, 20)
     write_png(os.path.join(TILES_DIR, "crops_atlas.png"), cw, ch, crops_atlas)
 
-    # 3b. farmer_sheet.png (4 frames x 16x22 = 64 x 22)
-    fw, fh = 4 * 16, 22
-    farmer_sheet = new_canvas(fw, fh)
-    for f_idx in range(4):
-        stamp(farmer_sheet, fw, f_idx * 16, 0, make_farmer_frame(f_idx), 16, 22)
-    write_png(os.path.join(TILES_DIR, "farmer_sheet.png"), fw, fh, farmer_sheet)
+    # 3b. Legacy fallback farmer_sheet.png (only if generate_farmer_sheet.py is absent)
+    if not os.path.exists(os.path.join(ROOT, "tools", "generate_farmer_sheet.py")):
+        fw, fh = 4 * 16, 22
+        farmer_sheet = new_canvas(fw, fh)
+        for f_idx in range(4):
+            stamp(farmer_sheet, fw, f_idx * 16, 0, make_farmer_frame(f_idx), 16, 22)
+        write_png(os.path.join(TILES_DIR, "farmer_sheet.png"), fw, fh, farmer_sheet)
 
     # 4. Individual UI icons (16x16, crop icons cropped from bottom 16x16 or centered)
     for name, tile in [
@@ -1009,6 +1237,8 @@ def generate_all():
         ("icon_rake.png", make_tool_icon("rake")),
         ("icon_water.png", make_tool_icon("water")),
         ("icon_inspect.png", make_tool_icon("inspect")),
+        ("icon_compost.png", make_tool_icon("compost")),
+        ("icon_probe.png", make_tool_icon("probe")),
     ]:
         write_png(os.path.join(UI_DIR, name), 16, 16, tile)
 

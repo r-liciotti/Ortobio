@@ -5,14 +5,17 @@ extends PanelContainer
 signal mode_changed(mode: String)
 signal tool_selected(tool_id: String)
 signal harvest_all_pressed
+signal npk_overlay_toggled(enabled: bool)
 
 var current_mode: String = "explore"
 var current_tool: String = "spade"
+var npk_overlay_enabled: bool = false
 
 var _explore_btn: Button
 var _work_btn: Button
 var _explore_panel: HBoxContainer
 var _explore_hint: Label
+var _npk_toggle_btn: Button
 var _harvest_all_btn: Button
 var _tools_scroll: ScrollContainer
 var _tool_buttons: Dictionary = {}
@@ -21,9 +24,13 @@ const TOOL_ITEMS := [
 	{"id": "spade", "label": "Vanga", "icon": "res://assets/ui/icon_spade.png"},
 	{"id": "rake", "label": "Rastrello", "icon": "res://assets/ui/icon_rake.png"},
 	{"id": "water", "label": "Acqua", "icon": "res://assets/ui/icon_water.png"},
+	{"id": "probe", "label": "Sonda", "icon": "res://assets/ui/icon_probe.png"},
+	{"id": "compost", "label": "Compost", "icon": "res://assets/ui/icon_compost.png"},
 	{"id": "seed:ravanello", "label": "Ravanello", "icon": "res://assets/ui/icon_ravanello.png"},
 	{"id": "seed:pomodoro", "label": "Pomodoro", "icon": "res://assets/ui/icon_pomodoro.png"},
 	{"id": "seed:cavolo_verza", "label": "Cavolo", "icon": "res://assets/ui/icon_cavolo_verza.png"},
+	{"id": "seed:piselli", "label": "Piselli", "icon": "res://assets/ui/icon_piselli.png"},
+	{"id": "seed:trifoglio", "label": "Trifoglio", "icon": "res://assets/ui/icon_trifoglio.png"},
 ]
 
 
@@ -66,9 +73,24 @@ func _build_ui() -> void:
 	_explore_hint.text = "Scorri il campo · Tocca una zolla\nper ispezionare o raccogliere"
 	_explore_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_explore_hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_explore_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_explore_hint.add_theme_font_size_override("font_size", 11)
 	_explore_hint.add_theme_color_override("font_color", Color(0.88, 0.84, 0.74))
 	_explore_panel.add_child(_explore_hint)
+
+	_npk_toggle_btn = Button.new()
+	_npk_toggle_btn.text = "N-P-K"
+	_npk_toggle_btn.tooltip_text = "Mostra/nascondi vista N-P-K del suolo"
+	_npk_toggle_btn.custom_minimum_size = Vector2(54, 40)
+	_npk_toggle_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_npk_toggle_btn.focus_mode = Control.FOCUS_NONE
+	_npk_toggle_btn.add_theme_font_size_override("font_size", 11)
+	_npk_toggle_btn.pressed.connect(func() -> void:
+		npk_overlay_enabled = not npk_overlay_enabled
+		_refresh_npk_btn_style()
+		npk_overlay_toggled.emit(npk_overlay_enabled)
+	)
+	_explore_panel.add_child(_npk_toggle_btn)
 
 	_harvest_all_btn = Button.new()
 	_harvest_all_btn.text = "Raccogli (0)"
@@ -91,12 +113,23 @@ func _build_ui() -> void:
 	_tools_scroll.add_child(tools_row)
 
 	for item in TOOL_ITEMS:
-		var tid := str(item["id"])
-		var btn := _make_tool_button(tid, str(item["label"]), str(item["icon"]))
+		var tid: String = str(item["id"])
+		var btn: Button = _make_tool_button(tid, str(item["label"]), str(item["icon"]))
 		tools_row.add_child(btn)
 		_tool_buttons[tid] = btn
 
 	_refresh_styles()
+
+
+func _load_icon_texture(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		var loaded: Resource = load(path)
+		if loaded is Texture2D:
+			return loaded as Texture2D
+	var img: Image = Image.load_from_file(ProjectSettings.globalize_path(path))
+	if img != null and not img.is_empty():
+		return ImageTexture.create_from_image(img)
+	return null
 
 
 func _make_mode_button(txt: String, mode_id: String) -> Button:
@@ -122,7 +155,7 @@ func _make_tool_button(tid: String, label_txt: String, icon_path: String) -> But
 	btn.add_child(vb)
 
 	var tex_rect := TextureRect.new()
-	tex_rect.texture = load(icon_path)
+	tex_rect.texture = _load_icon_texture(icon_path)
 	tex_rect.custom_minimum_size = Vector2(28, 28)
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	tex_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -196,6 +229,7 @@ func _refresh_styles() -> void:
 
 	_apply_btn_style(_explore_btn, active_mode_sb if current_mode == "explore" else idle_mode_sb)
 	_apply_btn_style(_work_btn, active_mode_sb if current_mode == "work" else idle_mode_sb)
+	_refresh_npk_btn_style()
 
 	for tid in _tool_buttons.keys():
 		var tid_str: String = str(tid)
@@ -213,6 +247,25 @@ func _refresh_styles() -> void:
 		t_sb.corner_radius_bottom_left = 5
 		t_sb.corner_radius_bottom_right = 5
 		_apply_btn_style(btn, t_sb)
+
+
+func _refresh_npk_btn_style() -> void:
+	if _npk_toggle_btn == null:
+		return
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.16, 0.54, 0.44) if npk_overlay_enabled else Color(0.26, 0.19, 0.14)
+	sb.border_width_top = 2 if npk_overlay_enabled else 1
+	sb.border_width_bottom = 2 if npk_overlay_enabled else 1
+	sb.border_width_left = 2 if npk_overlay_enabled else 1
+	sb.border_width_right = 2 if npk_overlay_enabled else 1
+	sb.border_color = Color(0.46, 0.94, 0.74) if npk_overlay_enabled else Color(0.38, 0.28, 0.20)
+	sb.corner_radius_top_left = 5
+	sb.corner_radius_top_right = 5
+	sb.corner_radius_bottom_left = 5
+	sb.corner_radius_bottom_right = 5
+	_apply_btn_style(_npk_toggle_btn, sb)
+	var font_col: Color = Color(0.96, 1.0, 0.94) if npk_overlay_enabled else Color(0.84, 0.78, 0.68)
+	_npk_toggle_btn.add_theme_color_override("font_color", font_col)
 
 
 func _apply_btn_style(btn: Button, sb: StyleBoxFlat) -> void:

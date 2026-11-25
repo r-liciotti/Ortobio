@@ -2,8 +2,8 @@
 """
 Detailed 24x28 Stardew-Valley-inspired farmer sprite sheet generator for Ortobio.
 Outputs:
-  - assets/tiles/farmer_sheet.png         (4 cols x 6 rows of 24x28 = 96x168)
-  - assets/previews/farmer_sheet_preview.png (6x zoomed QA preview)
+  - assets/tiles/farmer_sheet.png         (4 cols x 8 rows of 24x28 = 96x224)
+  - assets/previews/farmer_sheet_preview.png (5x zoomed QA preview)
 Rows:
   0: Idle & Walk (0=idle, 1=walk L, 2=idle, 3=walk R)
   1: Spade / Vanga (0=windup, 1=dig down, 2=lift clod, 3=recover)
@@ -11,6 +11,8 @@ Rows:
   3: Water / Annaffiatoio (0=hold can, 1=tilt & pour A, 2=tilt & pour B, 3=lower)
   4: Seed / Semina (0=pouch, 1=toss seeds, 2=scatter, 3=recover)
   5: Harvest / Raccolta (0=reach down, 1=pull up, 2=hold high, 3=recover)
+  6: Compost / Letame-Compost (0=scoop, 1=toss crumbs, 2=scatter onto soil, 3=recover)
+  7: Probe / Sonda NPK (0=aim probe, 1=insert into soil, 2=read indicator, 3=recover)
 """
 
 import os
@@ -53,7 +55,7 @@ C = {
     "b0": (74, 44, 26, 255),
     "b1": (112, 68, 40, 255),
     "b2": (148, 94, 56, 255),
-    # Tools (wood handle + steel + watering can + seeds)
+    # Tools (wood handle + steel + watering can + seeds + compost + probe)
     "w0": (92, 58, 32, 255),
     "w1": (142, 92, 52, 255),
     "w2": (184, 128, 76, 255),
@@ -65,6 +67,11 @@ C = {
     "c2": (154, 214, 246, 255), # Watering can shine / drops
     "sd": (244, 216, 112, 255), # Golden seeds
     "lf": (98, 176, 66, 255),   # Harvest leaf
+    "cm0": (56, 34, 22, 255),   # Deep rich compost
+    "cm1": (86, 54, 34, 255),   # Dark organic compost crumb
+    "cm2": (122, 80, 48, 255),  # Warm humus crumb
+    "pg": (108, 206, 78, 255),  # Soil probe green indicator
+    "py": (244, 212, 74, 255),  # Soil probe yellow indicator
 }
 
 
@@ -410,11 +417,80 @@ def make_frame(row, col):
             draw_farmer_base(px, body_dy=0, lean_x=0, leg_mode="idle", arm_pose="idle")
         return px
 
+    # Row 6: Compost (farmer scatters rich dark compost crumbs onto the soil)
+    if row == 6:
+        if col == 0:
+            draw_farmer_base(px, body_dy=0, lean_x=0, leg_mode="stance", arm_pose="down")
+            # Scoop/handful of rich dark compost held forward
+            fill_rect(px, 16, 16, 4, 3, "k")
+            put(px, 17, 17, "w1")
+            put(px, 18, 17, "cm1")
+            put(px, 18, 16, "cm2")
+        elif col == 1:
+            draw_farmer_base(px, body_dy=-1, lean_x=1, leg_mode="stance", arm_pose="forward")
+            # Tossing compost crumbs outward in an arc
+            put(px, 18, 15, "w1")
+            put(px, 19, 14, "cm1")
+            put(px, 21, 14, "cm2")
+            put(px, 22, 16, "cm0")
+            put(px, 20, 16, "cm1")
+            put(px, 22, 14, "lf")
+        elif col == 2:
+            draw_farmer_base(px, body_dy=1, lean_x=1, leg_mode="stance", arm_pose="forward")
+            # Dark compost crumbs scattering onto soil bed
+            put(px, 19, 18, "cm1")
+            put(px, 21, 19, "cm0")
+            put(px, 22, 20, "cm2")
+            put(px, 20, 21, "cm1")
+            put(px, 22, 22, "cm0")
+            put(px, 19, 23, "cm2")
+            put(px, 21, 23, "cm1")
+            put(px, 23, 22, "lf")
+        else:
+            draw_farmer_base(px, body_dy=0, lean_x=0, leg_mode="idle", arm_pose="idle")
+        return px
+
+    # Row 7: Probe (farmer inserts metal soil probe into the ground and reads its indicator)
+    if row == 7:
+        if col == 0:
+            draw_farmer_base(px, body_dy=0, lean_x=0, leg_mode="stance", arm_pose="forward")
+            # Holding sleek metal soil probe upright ready to insert
+            fill_rect(px, 18, 11, 3, 2, "k")
+            put(px, 19, 11, "m2")
+            draw_line_px(px, 19, 13, 19, 20, "m1")
+            put(px, 19, 14, "m2")
+            put(px, 19, 21, "pg")
+            put(px, 19, 22, "py")
+        elif col == 1:
+            draw_farmer_base(px, body_dy=1, lean_x=1, leg_mode="stance", arm_pose="down")
+            # Driving probe down into the soil
+            fill_rect(px, 19, 15, 3, 2, "k")
+            put(px, 20, 15, "m2")
+            draw_line_px(px, 20, 17, 20, 24, "m1")
+            put(px, 20, 18, "m2")
+            put(px, 20, 16, "pg")
+            put(px, 19, 24, "cm1")
+            put(px, 21, 24, "cm1")
+        elif col == 2:
+            draw_farmer_base(px, body_dy=0, lean_x=1, leg_mode="stance", arm_pose="forward")
+            # Probe planted in soil; farmer reads glowing green/yellow indicator
+            fill_rect(px, 19, 14, 3, 2, "k")
+            put(px, 20, 14, "py")
+            put(px, 20, 15, "pg")
+            put(px, 21, 13, "py")
+            draw_line_px(px, 20, 16, 20, 24, "m1")
+            put(px, 20, 18, "m2")
+            put(px, 19, 24, "cm1")
+            put(px, 21, 24, "cm0")
+        else:
+            draw_farmer_base(px, body_dy=0, lean_x=0, leg_mode="idle", arm_pose="idle")
+        return px
+
     return px
 
 
 def generate():
-    cols, rows = 4, 6
+    cols, rows = 4, 8
     fw, fh = 24, 28
     sw, sh = cols * fw, rows * fh
     sheet = [(0, 0, 0, 0)] * (sw * sh)
@@ -440,7 +516,7 @@ def generate():
                     idx = (y * scale + sy) * pw + (x * scale + sx)
                     prev[idx] = blend_over(prev[idx], col)
     write_png(os.path.join(PREVIEW_DIR, "farmer_sheet_preview.png"), pw, ph, prev)
-    print("Generated detailed 24x28 Stardew-style farmer_sheet.png!")
+    print("Generated detailed 24x28 Stardew-style farmer_sheet.png (4x8)!")
 
 
 if __name__ == "__main__":

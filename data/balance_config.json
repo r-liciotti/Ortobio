@@ -20,7 +20,9 @@
       "water": 2,
       "seed": 0,
       "harvest": 0,
-      "inspect": 0
+      "inspect": 0,
+      "compost": 2,
+      "probe": 1
     }
   },
   "economy": {
@@ -28,6 +30,15 @@
   },
   "soil": {
     "default_fertility": 65.0,
+    "default_n": 80.0,
+    "default_p": 80.0,
+    "default_k": 80.0,
+    "rest_regen_per_day": 0.5,
+    "compost_delta": {
+      "n": 22.0,
+      "p": 18.0,
+      "k": 18.0
+    },
     "moisture_water_add": 65.0,
     "moisture_rain_add": 55.0,
     "moisture_evap_base": 22.0,
