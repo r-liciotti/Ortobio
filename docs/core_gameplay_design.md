@@ -213,25 +213,22 @@ Al posto di un semplice pulsante "Vendi", al Mercato del Villaggio gestisci una 
 
 ## 7. Piano a Micro-Milestone (Sintesi — Dettaglio in `piano_sviluppo_incrementale.md`)
 
-Ogni micro-milestone testa **1–2 meccaniche concrete** in Godot prima di aggiungere la successiva:
+Strutturato secondo best practice indie (**Fondamenta → Vertical Slice → Espansione → Polish**):
 
-- **Fase A (Campo & Agronomia):**
-  - `v0.1` *(Completata ✅)*: Campo `10×30`, blocchi arrotondati 3D, 3 semi, contadino animato `24×28` con coda azioni.
-  - `v0.2a`: **`N-P-K` lenti** (nascosti di default) + **Produttività in pezzi** + **Piselli** + **Concime Verde (Trifoglio)** + **Compost** + **Sonda Analisi Suolo `Lv. 1`**.
-  - `v0.2b`: **Rimedi Clima** (`Telo TNT`, `Campana di Vetro`, `Irrigatore 3×3`) + **Concimi semplici `N/P/K`**.
-- **Fase B (Loop Completo & Progressione):**
-  - `v0.3a`: **Zaino con Freschezza** + **Bancarella al Mercato** (Cassette potenziabili + Clienti NPC + **Domanda/Offerta**).
-  - `v0.3b`: **Mappa Generale** + **Casa base** (Letto, **Riepilogo Serale**, Barometro) + **Salvataggio locale**.
-  - `v0.3c`: **Build Contadino** (6 caratteristiche + Talenti Lv. 5) + **Villaggio `Lv. 1 → Lv. 2`**.
-  - `v0.3d`: **Bacheca Ordini** + **Eventi Randomici** + **Almanacco v1**.
-- **Fase C (Espansione & Fattoria):**
-  - `v0.4a`: Bonifica Campo (Legna/Pietra/Fibre) + 10–12 colture (Piante Compagne) + **Polish visivo Stagioni**.
-  - `v0.4b`: Alberi `2×2` (**Melo**, **Ulivo**) + **Traguardi della Valle (Bundle)**.
-  - `v0.4c`: **Fattoria #1** (Recinti flood-fill, Pollaio, Galline, Compostiera) + **Banco Fresco** in Bancarella.
-- **Fase D (Mid/Late-Game):**
-  - `v0.5a`: **Villaggio `Lv. 3`** + **Locanda (1° NPC)** + Mercante Ambulante + **Sagra Fine Stagione (`Marchio del Borgo`)**.
-  - `v0.5b`: **Conserve / Olio EVO / Vino / Formaggi** (senza scadenza!) + nuove Cassette Bancarella + Vigna & Animali avanzati (`Lv. 4–5`).
-  - `v0.5c`: **Casa stile *The Sims* multi-piano + Sotterranei (`-1/-2`)** + Serra Fredda + polish Android.
+- **Fase 0 — Prototipo Campo *(Completata ✅)*:**
+  - `v0.1` ✅: Campo `10×30`, blocchi arrotondati 3D, 3 semi, contadino animato `24×28` con coda azioni.
+  - `v0.2a` ✅: `N-P-K` lenti (nascosti di default) + Produttività in pezzi + **Piselli** + **Trifoglio** (sovescio) + **Compost** + **Sonda Analisi Suolo** + vista `N-P-K` + stile terra concimata.
+- **Fase 1 — Fondamenta Architetturali *(Prossima)*:**
+  - `v0.2b`: **`GameState` (Autoload)** + **`InventoryManager`** (Zaino con Freschezza) + **`SaveManager`** (serializzazione JSON testata subito) + **`SceneManager`** (cambio schermata + Pausa Intelligente).
+- **Fase 2 — Vertical Slice Giocabile *(Loop Completo)*:**
+  - `v0.3a`: **Mappa Generale** + **Casa base** (Letto, **Riepilogo Serale**, Barometro) + Zaino vivo.
+  - `v0.3b`: **La Tua Bancarella al Mercato** (Cassette potenziabili `3→9` × `6→20`, Clienti NPC + **Domanda/Offerta**).
+  - `v0.3c`: **Rimedi Clima** (`Costruisci` `1×1`: Telo TNT, Campana di Vetro, Irrigatore `3×3`) + **Concimi `N/P/K`**.
+  - `v0.3d`: **Build Contadino** (6 caratteristiche + Talenti Lv. 5) + **Villaggio `Lv. 1 → Lv. 2`** + **Bacheca Ordini** + **Almanacco v1**.
+- **Fase 3 — Alpha / Espansione Contenuti (`v0.4a` – `v0.4d`):**
+  - Bonifica Campo, 10–12 colture, Alberi (`Melo`, `Ulivo`), **Fattoria #1** (Recinti flood-fill, Pollaio, Compostiera), **Villaggio `Lv. 3`** + **Locanda (1° NPC)** + Eventi/Bundle/Sagre (`Marchio del Borgo`), Conserve/Olio/Vino/Formaggi + nuove Cassette Bancarella, **Casa stile *The Sims*** multi-piano + Sotterranei (`-1/-2`), Serra Fredda.
+- **Fase 4 — Beta, Polish & Android (`v0.5`):**
+  - Restyling **Menu Inferiore (`ToolDock`)**, **Vento / Ombre Nuvole / Ombre orientate dal Sole / Dettagli Stagioni**, audio, bilanciamento multi-anno ed export Google Play.
 
 ---
 
