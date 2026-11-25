@@ -163,18 +163,27 @@ Eventi leggeri e vari che rompono la routine e premiano chi sa cogliere l'attimo
 
 ---
 
-## 6. Economia Dinamica (Domanda & Offerta), Zaino & Anti-Soft-Lock
+## 6. Economia Dinamica, Bancarella al Mercato, Zaino & Anti-Soft-Lock
 
-- **Domanda & Offerta del Villaggio (al posto della qualità):**
-  - Ogni giorno/settimana ogni prodotto ha un indicatore chiaro al Mercato: **Bassa (`0.75×`)**, **Normale (`1.0×`)**, **Alta (`1.3×`)**, **Richiestissimo (`1.6×` ▲)**.
-  - **Effetto Offerta:** se vendi grandissime quantità dello stesso ortaggio in pochi giorni, il villaggio si satura e il suo prezzo scende temporaneamente, mentre i prodotti che scarseggiano salgono!
-  - **Sinergia perfetta con la Rotazione `N-P-K`:** ruotare l'orto produce ortaggi variati, evita di saturare il mercato e massimizza i guadagni (in più ti dà un motivo concreto per **tenere i prodotti nello Zaino/Dispensa** aspettando un giorno di domanda alta!).
+### 6.1 La Tua Bancarella al Mercato (Vendita Visiva agli NPC del Villaggio)
+Al posto di un semplice pulsante "Vendi", al Mercato del Villaggio gestisci una **tua postazione/bancarella fisica** in pixel art:
+- **Come funziona:** posizioni i tuoi prodotti dentro le **Cassette** esposte sul banco. Durante la giornata **gli NPC del villaggio passano davanti alla tua bancarella** e comprano ciò che desiderano in base alla **Domanda & Offerta del giorno** (i prodotti molto richiesti vanno a ruba a prezzo alto; quelli con bassa domanda si vendono più lentamente). La sera il **Riepilogo Giornaliero** ti mostra tutto l'incasso della bancarella!
+- **Progressione di Banco & Cassette (Potenziabili):**
+  - **Livello del Banco (Postazione):** aumenta il numero massimo di cassette esponibili contemporaneamente (es. `Lv. 1: 3 cassette` → `Lv. 2: 5` → `Lv. 3: 7` → `Lv. 4: 9 cassette`!).
+  - **Livello delle Cassette:** aumenta la capienza di ciascuna cassetta (es. `Lv. 1: 6 prodotti` → `Lv. 2: 10` → `Lv. 3: 15` → `Lv. 4: 20 prodotti`!) e sui livelli alti migliora la conservazione dei prodotti esposti.
+- **5 Tipologie di Cassette / Espositori (Raggruppate per Categoria):**
+  1. **Cassetta di Legno *(Orto & Frutta Fresca)*** *(disponibile da subito)*: tutti gli ortaggi, radici, legumi, aromatiche e frutta degli alberi.
+  2. **Banco Fresco *(Uova, Latte & Formaggi)***: uova, latte, burro, formaggi freschi e stagionati.
+  3. **Scaffale Vasetti *(Conserve, Marmellate & Miele)***: miele, marmellate, sughi, sott'oli ed essiccati (senza scadenza).
+  4. **Rastrelliera Bottiglie *(Olio EVO, Vino & Succhi)***: bottiglie di olio extravergine, vino, sidro e succhi.
+  5. **Banco Specialità / Carni & Salumi** *(predisposto per eventuali prodotti animali avanzati in futuro)*.
+- **Domanda & Offerta del Villaggio:**
+  - Ogni giorno ogni prodotto ha una domanda chiara: **Bassa (`0.75×`)**, **Normale (`1.0×`)**, **Alta (`1.3×`)**, **Richiestissimo (`1.6×` ▲)**.
+  - Esporre/vendere sempre lo stesso prodotto in grandi quantità satura temporaneamente il villaggio (abbassandone il prezzo), premiando chi **ruota le colture (`N-P-K`)** e varia l'esposizione sulla bancarella!
+  - *(Opzionale emergenza)* Il **Mercante all'ingrosso** può comunque ritirare merce istantaneamente a prezzo ridotto (`80%`) se ti servono monete al volo, ma **la tua Bancarella resta sempre il canale più redditizio**.
 - **Zaino / Magazzino (Semplice, niente equipaggiamento attrezzi):**
   - Gli **attrezzi** (Vanga, Rastrello, Annaffiatoio, Sonda, ecc.) restano **sempre pronti nella barra `Lavora`** e si potenziano direttamente al Fabbro (`Vecchio → Ferro → Acciaio`) senza doverli spostare/equipaggiare nello Zaino.
-  - Lo **Zaino / Magazzino** conserva solo: **Semi**, **Raccolti** (1 solo slot pulito per prodotto), **Ammendanti/Accessori** e **Materiali** (Legna, Pietra, Fibre).
-- **Vendita Doppia Scelta:**
-  - **Cassetta di Spedizione** (nel Campo/Casa): metti dentro ciò che vuoi vendere e incassi nel **Riepilogo Serale** quando vai a dormire.
-  - **Mercato del Paese:** vendita diretta immediata (vedendo subito il listino Domanda/Offerta del giorno) quando ti servono monete per comprare nuovi semi.
+  - Lo **Zaino / Magazzino** conserva solo: **Semi**, **Raccolti** (1 solo slot pulito per prodotto), **Concimi/Accessori** e **Materiali** (Legna, Pietra, Fibre).
 - **Cibo & Energia:** puoi mangiare i tuoi prodotti (o merende cucinate in Casa) per ricaricare energia durante la giornata.
 - **Anti-Soft-Lock:** se finisci con `0 €`, `0` semi e `0` raccolti, il Mercato offre gratuitamente un piccolo sacchetto di semi base di stagione (+ raccolta spontanea sui bordi del campo).
 
@@ -213,8 +222,8 @@ Ogni micro-milestone introduce **1–2 idee concrete**, si testa subito in Godot
   - [x] `N-P-K` nascosti di default → strumento sbloccabile **Sonda Analisi Suolo** per analizzare le zolle e rivelare i valori (con toggle di test in `v0.2a` per provarla subito).
 - **`v0.2b` — Rimedi al Clima (Test "Problema → Rimedio"):**
   - [x] Primo accessorio protettivo (**Telo TNT** contro il gelo per salvare i Pomodori fuori stagione) + **Irrigatore base** (test posizionamento accessori `1×1` sul campo).
-- **`v0.2c` — Zaino, Mercato Dinamico (Domanda/Offerta), Livelli Villaggio & Riepilogo Serale:**
-  - [ ] Raccolti nello **Zaino** (quantità scalata sulla produttività `N-P-K`), listino **Domanda & Offerta del Villaggio** al Mercato, **Cassetta di Spedizione**, **Livelli del Villaggio** (investimento monete per sbloccare semi/strumenti), **Riepilogo Giornaliero** e **Salvataggio locale**.
+- **`v0.2c` — Zaino (con Freschezza), Bancarella al Mercato (Cassette + NPC Clienti), Livelli Villaggio & Riepilogo Serale:**
+  - [ ] Raccolti nello **Zaino** (quantità scalata sulla produttività `N-P-K` + freschezza), **Bancarella personale al Mercato** (cassette potenziabili + clienti NPC che comprano secondo **Domanda & Offerta**), **Livelli del Villaggio**, **Riepilogo Giornaliero** e **Salvataggio locale**.
 - **`v0.2d` — Punti Abilità Contadino, Mappa Generale, Casa Base & Obiettivi v1:**
   - [ ] **XP & Punti Abilità del Contadino** spendibili (Agilità movimento, Destrezza azione, Resistenza energia, Pollice Verde, Mestiere).
   - [ ] **Mappa Generale** (mini-pixel art: Casa, Campo #1, Villaggio/Mercato), **Casa base** con Letto, **Bacheca Ordini** settimanali e **Almanacco v1** (con meteo di domani).
