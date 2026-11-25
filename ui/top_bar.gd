@@ -4,10 +4,11 @@ extends PanelContainer
 
 signal sleep_pressed
 signal season_cycle_pressed
+signal time_cycle_pressed
 
 var _season_label: Label
 var _weather_label: Label
-var _clock_label: Label
+var _clock_btn: Button
 var _coins_label: Label
 var _field_label: Label
 var _energy_bar: ProgressBar
@@ -45,8 +46,11 @@ func _build_ui() -> void:
 	_weather_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row1.add_child(_weather_label)
 
-	_clock_label = _make_pill_label("06:00", Color(0.82, 0.92, 0.98))
-	row1.add_child(_clock_label)
+	_clock_btn = _make_compact_button("06:00", Color(0.24, 0.30, 0.40))
+	_clock_btn.tooltip_text = "Tocca per cambiare fascia oraria (Mattina / Giorno / Tramonto / Notte)"
+	_clock_btn.add_theme_color_override("font_color", Color(0.84, 0.94, 1.0))
+	_clock_btn.pressed.connect(func() -> void: time_cycle_pressed.emit())
+	row1.add_child(_clock_btn)
 
 	_coins_label = _make_pill_label("150 €", Color(1.0, 0.85, 0.35))
 	row1.add_child(_coins_label)
@@ -68,7 +72,7 @@ func _build_ui() -> void:
 	row2.add_child(energy_box)
 
 	_energy_bar = ProgressBar.new()
-	_energy_bar.custom_minimum_size = Vector2(68, 14)
+	_energy_bar.custom_minimum_size = Vector2(44, 14)
 	_energy_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_energy_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_energy_bar.show_percentage = false
@@ -94,6 +98,8 @@ func _build_ui() -> void:
 
 	_energy_label = Label.new()
 	_energy_label.text = "100/100"
+	_energy_label.custom_minimum_size = Vector2(46, 0)
+	_energy_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_energy_label.add_theme_font_size_override("font_size", 11)
 	_energy_label.add_theme_color_override("font_color", Color(0.75, 0.94, 0.65))
 	energy_box.add_child(_energy_label)
@@ -140,15 +146,22 @@ func _make_compact_button(txt: String, bg: Color) -> Button:
 	return btn
 
 
-func update_state(tw: TimeWeatherManager, sim: GridSimulation) -> void:
-	_season_label.text = "%s G.%d" % [tw.get_season_short(), tw.day_in_season]
-	var t_cur := int(tw.get_current_temperature())
-	var t_min := int(tw.temp_min)
-	var t_max := int(tw.temp_max)
-	_weather_label.text = "%s %d° (%d°/%d°)" % [tw.get_weather_icon_text(), t_cur, t_min, t_max]
-	_clock_label.text = tw.get_formatted_time()
-	_coins_label.text = "%d €" % sim.coins
-	_field_label.text = "Campo %dx%d" % [sim.width, sim.height]
-	_energy_bar.max_value = sim.max_energy
-	_energy_bar.value = sim.energy
-	_energy_label.text = "%d/%d" % [sim.energy, sim.max_energy]
+func update_state(tw: TimeWeatherManager, sim: GridSimulation, coins_val: int = -1, energy_val: int = -1, max_energy_val: int = -1) -> void:
+	if tw != null:
+		_season_label.text = "%s G.%d" % [tw.get_season_short(), tw.day_in_season]
+		var t_cur: int = int(tw.get_current_temperature())
+		var t_min: int = int(tw.temp_min)
+		var t_max: int = int(tw.temp_max)
+		_weather_label.text = "%s %d° (%d°/%d°)" % [tw.get_weather_icon_text(), t_cur, t_min, t_max]
+		_clock_btn.text = tw.get_formatted_time()
+
+	var resolved_coins: int = coins_val if coins_val >= 0 else (sim.coins if sim != null else 0)
+	var resolved_energy: int = energy_val if energy_val >= 0 else (sim.energy if sim != null else 0)
+	var resolved_max_energy: int = max_energy_val if max_energy_val > 0 else (sim.max_energy if sim != null else 100)
+
+	_coins_label.text = "%d €" % resolved_coins
+	if sim != null:
+		_field_label.text = "Campo %dx%d" % [sim.width, sim.height]
+	_energy_bar.max_value = resolved_max_energy
+	_energy_bar.value = resolved_energy
+	_energy_label.text = "%d/%d" % [resolved_energy, resolved_max_energy]

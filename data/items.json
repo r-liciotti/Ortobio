@@ -1,0 +1,136 @@
+{
+  "items": [
+    {
+      "id": "spade",
+      "name": "Vanga",
+      "category": "tool",
+      "stackable": false,
+      "max_durability": 60,
+      "repair_cost": 15,
+      "tool_action": "spade",
+      "icon": "res://assets/ui/icon_spade.png"
+    },
+    {
+      "id": "rake",
+      "name": "Rastrello",
+      "category": "tool",
+      "stackable": false,
+      "max_durability": 60,
+      "repair_cost": 15,
+      "tool_action": "rake",
+      "icon": "res://assets/ui/icon_rake.png"
+    },
+    {
+      "id": "water",
+      "name": "Annaffiatoio",
+      "category": "tool",
+      "stackable": false,
+      "max_durability": 60,
+      "repair_cost": 15,
+      "tool_action": "water",
+      "icon": "res://assets/ui/icon_water.png"
+    },
+    {
+      "id": "probe",
+      "name": "Sonda",
+      "category": "tool",
+      "stackable": false,
+      "max_durability": 60,
+      "repair_cost": 15,
+      "tool_action": "probe",
+      "icon": "res://assets/ui/icon_probe.png"
+    },
+    {
+      "id": "compost",
+      "name": "Compost",
+      "category": "amendment",
+      "stackable": true,
+      "tool_action": "compost",
+      "icon": "res://assets/ui/icon_compost.png"
+    },
+    {
+      "id": "seed_ravanello",
+      "name": "Semi Ravanello",
+      "category": "seed",
+      "stackable": true,
+      "crop_id": "ravanello",
+      "icon": "res://assets/ui/icon_ravanello.png"
+    },
+    {
+      "id": "seed_pomodoro",
+      "name": "Semi Pomodoro",
+      "category": "seed",
+      "stackable": true,
+      "crop_id": "pomodoro",
+      "icon": "res://assets/ui/icon_pomodoro.png"
+    },
+    {
+      "id": "seed_cavolo_verza",
+      "name": "Semi Cavolo",
+      "category": "seed",
+      "stackable": true,
+      "crop_id": "cavolo_verza",
+      "icon": "res://assets/ui/icon_cavolo_verza.png"
+    },
+    {
+      "id": "seed_piselli",
+      "name": "Semi Piselli",
+      "category": "seed",
+      "stackable": true,
+      "crop_id": "piselli",
+      "icon": "res://assets/ui/icon_piselli.png"
+    },
+    {
+      "id": "seed_trifoglio",
+      "name": "Semi Trifoglio",
+      "category": "seed",
+      "stackable": true,
+      "crop_id": "trifoglio",
+      "icon": "res://assets/ui/icon_trifoglio.png"
+    },
+    {
+      "id": "ravanello",
+      "name": "Ravanello",
+      "category": "crop",
+      "stackable": true,
+      "shelf_life_days": 7,
+      "sell_price": 14,
+      "icon": "res://assets/ui/icon_ravanello.png"
+    },
+    {
+      "id": "pomodoro",
+      "name": "Pomodoro",
+      "category": "crop",
+      "stackable": true,
+      "shelf_life_days": 6,
+      "sell_price": 15,
+      "icon": "res://assets/ui/icon_pomodoro.png"
+    },
+    {
+      "id": "cavolo_verza",
+      "name": "Cavolo Verza",
+      "category": "crop",
+      "stackable": true,
+      "shelf_life_days": 14,
+      "sell_price": 45,
+      "icon": "res://assets/ui/icon_cavolo_verza.png"
+    },
+    {
+      "id": "piselli",
+      "name": "Piselli",
+      "category": "crop",
+      "stackable": true,
+      "shelf_life_days": 6,
+      "sell_price": 12,
+      "icon": "res://assets/ui/icon_piselli.png"
+    },
+    {
+      "id": "scarti_vegetali",
+      "name": "Scarti Vegetali",
+      "category": "material",
+      "stackable": true,
+      "sell_price": 2,
+      "icon": "res://assets/ui/icon_compost.png"
+    }
+  ]
+}

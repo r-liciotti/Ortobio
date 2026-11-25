@@ -15,6 +15,12 @@ config/description="Simulatore agronomico 2D pixel art verticale per Android"
 run/main_scene="res://scenes/FieldScreen.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 
+[autoload]
+
+SaveManager="*res://core/save_manager.gd"
+GameState="*res://core/game_state.gd"
+SceneManager="*res://core/scene_manager.gd"
+
 [display]
 
 window/size/viewport_width=360

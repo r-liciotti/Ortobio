@@ -1173,6 +1173,80 @@ def make_farmer_frame(frame_idx):
     return px
 
 
+def make_cloud_shadow_variant(variant):
+    """
+    Generates a single 64x32 pixel-art cumulus cloud silhouette with UNIFORM opacity
+    (no overlapping circle seams!) and a subtle softer 1px outer fringe.
+    """
+    w, h = 64, 32
+    # Define organic cumulus silhouettes as union of ellipses (flat base, billowy puffs on top)
+    if variant == 0:
+        # Classic broad cumulus
+        blobs = [
+            (32.0, 20.0, 24.0, 6.5),
+            (20.0, 17.5, 11.5, 7.0),
+            (31.0, 13.0, 13.0, 9.0),
+            (44.0, 17.0, 10.5, 6.8),
+            (13.0, 20.5, 7.5, 4.5),
+            (51.0, 20.5, 7.0, 4.2),
+        ]
+    elif variant == 1:
+        # Tall twin-puff cumulus
+        blobs = [
+            (32.0, 21.0, 20.0, 5.8),
+            (23.0, 14.5, 11.0, 8.2),
+            (38.0, 15.5, 12.0, 8.5),
+            (49.0, 20.0, 8.0, 4.8),
+            (15.0, 20.0, 7.5, 4.5),
+        ]
+    else:
+        # Elongated breezy drift cloud
+        blobs = [
+            (32.0, 19.5, 25.0, 5.2),
+            (18.0, 16.5, 9.5, 5.8),
+            (30.0, 14.5, 11.5, 6.5),
+            (43.0, 16.5, 10.0, 5.5),
+            (53.0, 19.5, 6.5, 3.8),
+        ]
+
+    # Compute binary union mask on a 2x2 pixel-art grid (chunky crisp 2px steps!)
+    mask = [[0] * w for _ in range(h)]
+    for y in range(0, h, 2):
+        for x in range(0, w, 2):
+            cx_p = x + 0.5
+            cy_p = y + 0.5
+            inside = False
+            for (bx, by, rx, ry) in blobs:
+                dx = (cx_p - bx) / rx
+                dy = (cy_p - by) / ry
+                if dx * dx + dy * dy <= 1.0:
+                    inside = True
+                    break
+            # Flatten underside gently for authentic cumulus base
+            if inside and cy_p > 24.5:
+                inside = False
+            if inside:
+                for dy2 in range(2):
+                    for dx2 in range(2):
+                        if y + dy2 < h and x + dx2 < w:
+                            mask[y + dy2][x + dx2] = 1
+
+    # Build uniform-alpha silhouette with soft 1-step rim (NO internal overlap!)
+    px = new_canvas(w, h, (0, 0, 0, 0))
+    for y in range(h):
+        for x in range(w):
+            if mask[y][x] == 1:
+                # Check if edge pixel (any 4-neighbor outside)
+                is_edge = (
+                    x == 0 or x == w - 1 or y == 0 or y == h - 1
+                    or mask[y - 1][x] == 0 or mask[y + 1][x] == 0
+                    or mask[y][x - 1] == 0 or mask[y][x + 1] == 0
+                )
+                alpha = 145 if is_edge else 255
+                px[y * w + x] = (18, 28, 46, alpha)
+    return px
+
+
 def generate_all():
     # 1. field_atlas.png (8 cols x 3 rows of 16x16 = 128 x 48)
     # Row 0: 4 organic grass variants + 4 inner-corner grass bevel patches (NW, NE, SW, SE)
@@ -1222,6 +1296,13 @@ def generate_all():
             c_px = make_crop_3d(cid, st)
             stamp(crops_atlas, cw, st * 16, r_idx * 20, c_px, 16, 20)
     write_png(os.path.join(TILES_DIR, "crops_atlas.png"), cw, ch, crops_atlas)
+
+    # 3b. cloud_shadows.png (3 cumulus silhouettes x 64x32 = 192 x 32)
+    clw, clh = 3 * 64, 32
+    clouds_atlas = new_canvas(clw, clh)
+    for v_idx in range(3):
+        stamp(clouds_atlas, clw, v_idx * 64, 0, make_cloud_shadow_variant(v_idx), 64, 32)
+    write_png(os.path.join(TILES_DIR, "cloud_shadows.png"), clw, clh, clouds_atlas)
 
     # 3b. Legacy fallback farmer_sheet.png (only if generate_farmer_sheet.py is absent)
     if not os.path.exists(os.path.join(ROOT, "tools", "generate_farmer_sheet.py")):

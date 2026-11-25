@@ -316,3 +316,69 @@ func _run_all() -> void:
 	gm_cell["crop"]["harvest_ready"] = true
 	_assert(sim.apply_spade(6, 0)["ok"] == false and str(sim.apply_spade(6, 0)["reason"]) == "no_energy", "Green-manure spade fails with 0 energy")
 	_assert(not gm_cell["crop"].is_empty(), "Failed green-manure spade keeps crop intact")
+
+	# 14. Overripe crop perishing (Ravanello overripe_days = 3)
+	var sim_over := GridSimulation.new(cfg, crops)
+	sim_over.apply_spade(0, 0)
+	sim_over.apply_rake(0, 0)
+	sim_over.plant_seed(0, 0, "ravanello")
+	var over_cell: Dictionary = sim_over.get_cell(0, 0)
+	_assert(int(over_cell["crop"].get("days_ready", -1)) == 0, "Newly planted crop starts with days_ready == 0")
+	tw.set_weather_override("sole", 12.0, 20.0)
+	for _d: int in range(4):
+		over_cell["moisture"] = 60.0
+		sim_over.simulate_day_step(tw.get_weather_snapshot())
+	_assert(bool(over_cell["crop"].get("harvest_ready", false)), "Ravanello matures after 4 days")
+	_assert(int(over_cell["crop"].get("days_ready", -1)) == 0, "Maturity day keeps days_ready == 0")
+	for _d: int in range(2):
+		over_cell["moisture"] = 60.0
+		sim_over.simulate_day_step(tw.get_weather_snapshot())
+	_assert(
+		bool(over_cell["crop"].get("harvest_ready", false))
+		and not bool(over_cell["crop"].get("withered", false))
+		and int(over_cell["crop"].get("days_ready", -1)) == 2,
+		"Ravanello stays harvestable for 2 additional days (days_ready == 2)"
+	)
+	over_cell["moisture"] = 60.0
+	var over_sum: Dictionary = sim_over.simulate_day_step(tw.get_weather_snapshot())
+	_assert(int(over_sum.get("crops_withered", 0)) == 1, "Summary reports 1 withered crop on 3rd overripe day")
+	_assert(
+		bool(over_cell["crop"].get("withered", false))
+		and not bool(over_cell["crop"].get("harvest_ready", true))
+		and str(over_cell["crop"].get("stress_reason", "")) == "overripe"
+		and int(over_cell["crop"].get("stage", -1)) == 5
+		and is_equal_approx(float(over_cell["crop"].get("health", -1.0)), 0.0),
+		"Ravanello perishes as overripe on 3rd unharvested day"
+	)
+	var over_clear: Dictionary = sim_over.clear_withered_or_harvest(0, 0)
+	_assert(bool(over_clear.get("ok", false)) and str(over_clear.get("action", "")) == "cleared_withered", "Overripe withered crop can be cleared")
+
+	# Multi-harvest regrow resets days_ready
+	sim_over.apply_spade(1, 0)
+	sim_over.apply_rake(1, 0)
+	sim_over.plant_seed(1, 0, "piselli")
+	var multi_cell: Dictionary = sim_over.get_cell(1, 0)
+	for _d: int in range(7):
+		multi_cell["moisture"] = 60.0
+		sim_over.simulate_day_step(tw.get_weather_snapshot())
+	_assert(bool(multi_cell["crop"].get("harvest_ready", false)) and int(multi_cell["crop"].get("days_ready", -1)) == 0, "Piselli matures in 7 days on rich P soil with days_ready == 0")
+	for _d: int in range(2):
+		multi_cell["moisture"] = 60.0
+		sim_over.simulate_day_step(tw.get_weather_snapshot())
+	_assert(int(multi_cell["crop"].get("days_ready", 0)) == 2, "Piselli tracks days_ready == 2 before harvest")
+	var multi_h: Dictionary = sim_over.clear_withered_or_harvest(1, 0)
+	_assert(bool(multi_h.get("ok", false)) and int(multi_cell["crop"].get("days_ready", -1)) == 0, "Harvesting multi-harvest Piselli resets days_ready to 0")
+
+	# 15. Projected sun shadow skew_x / scale_y parameters
+	tw.set_weather_override("sole", 14.0, 22.0)
+	tw.minutes_of_day = 6.0 * 60.0
+	var sh_dawn: Dictionary = tw.get_sun_shadow_params()
+	tw.minutes_of_day = 13.0 * 60.0
+	var sh_noon: Dictionary = tw.get_sun_shadow_params()
+	tw.minutes_of_day = 20.0 * 60.0
+	var sh_dusk: Dictionary = tw.get_sun_shadow_params()
+	_assert(float(sh_dawn.get("skew_x", 0.0)) < -0.9, "Dawn shadow skew_x leans West (< -0.9)")
+	_assert(absf(float(sh_noon.get("skew_x", 99.0))) < 0.01, "Noon shadow skew_x is straight (~0.0)")
+	_assert(float(sh_dusk.get("skew_x", 0.0)) > 0.9, "Sunset shadow skew_x leans East (> 0.9)")
+	_assert(float(sh_dawn.get("scale_y", 0.0)) > float(sh_noon.get("scale_y", 99.0)), "Dawn shadow scale_y is longer than noon scale_y")
+	_assert(float(sh_dusk.get("scale_y", 0.0)) > float(sh_noon.get("scale_y", 99.0)), "Sunset shadow scale_y is longer than noon scale_y")

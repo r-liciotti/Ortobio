@@ -32,32 +32,128 @@ func _init(balance_config: Dictionary = {}, crops: Dictionary = {}) -> void:
 	_init_cells()
 
 
+func _make_default_cell(x: int, y: int) -> Dictionary:
+	var soil_cfg: Dictionary = config.get("soil", {})
+	var default_n: float = float(soil_cfg.get("default_n", 80.0))
+	var default_p: float = float(soil_cfg.get("default_p", 80.0))
+	var default_k: float = float(soil_cfg.get("default_k", 80.0))
+	var variant: int = (x * 7 + y * 13) % 3
+	var cell: Dictionary = {
+		"x": x,
+		"y": y,
+		"soil_state": SoilState.INCOLTO,
+		"moisture": 20.0,
+		"n": default_n,
+		"p": default_p,
+		"k": default_k,
+		"npk_analyzed": false,
+		"fertility": 80.0,
+		"fertilized": false,
+		"waterlogged_days": 0,
+		"grass_variant": variant,
+		"crop": {},
+	}
+	_sync_fertility(cell)
+	return cell
+
+
 func _init_cells() -> void:
 	cells.clear()
-	var soil_cfg: Dictionary = config.get("soil", {})
-	var default_n := float(soil_cfg.get("default_n", 80.0))
-	var default_p := float(soil_cfg.get("default_p", 80.0))
-	var default_k := float(soil_cfg.get("default_k", 80.0))
 	for y in range(height):
 		for x in range(width):
-			var variant := (x * 7 + y * 13) % 3
-			var cell: Dictionary = {
-				"x": x,
-				"y": y,
-				"soil_state": SoilState.INCOLTO,
-				"moisture": 20.0,
-				"n": default_n,
-				"p": default_p,
-				"k": default_k,
-				"npk_analyzed": false,
-				"fertility": 80.0,
-				"fertilized": false,
-				"waterlogged_days": 0,
-				"grass_variant": variant,
-				"crop": {},
-			}
-			_sync_fertility(cell)
-			cells.append(cell)
+			cells.append(_make_default_cell(x, y))
+
+
+func _normalize_crop(raw_crop: Dictionary) -> Dictionary:
+	if raw_crop.is_empty():
+		return {}
+	return {
+		"crop_id": str(raw_crop.get("crop_id", "")),
+		"growth_days_acc": float(raw_crop.get("growth_days_acc", 0.0)),
+		"health": float(raw_crop.get("health", 100.0)),
+		"stage": int(raw_crop.get("stage", 0)),
+		"harvest_ready": bool(raw_crop.get("harvest_ready", false)),
+		"withered": bool(raw_crop.get("withered", false)),
+		"stress_reason": str(raw_crop.get("stress_reason", "")),
+		"days_alive": int(raw_crop.get("days_alive", 0)),
+		"off_season_days": int(raw_crop.get("off_season_days", 0)),
+		"days_ready": maxi(0, int(raw_crop.get("days_ready", 0))),
+	}
+
+
+func _normalize_cell(raw_cell: Dictionary, fallback_x: int = 0, fallback_y: int = 0) -> Dictionary:
+	var cx: int = int(raw_cell.get("x", fallback_x))
+	var cy: int = int(raw_cell.get("y", fallback_y))
+	var crop_dict: Dictionary = {}
+	var raw_crop: Variant = raw_cell.get("crop", {})
+	if raw_crop is Dictionary:
+		var raw_crop_dict: Dictionary = raw_crop
+		crop_dict = _normalize_crop(raw_crop_dict)
+	var cell: Dictionary = {
+		"x": cx,
+		"y": cy,
+		"soil_state": clampi(int(raw_cell.get("soil_state", SoilState.INCOLTO)), SoilState.INCOLTO, SoilState.RASTRELLATO),
+		"moisture": clampf(float(raw_cell.get("moisture", 20.0)), 0.0, 100.0),
+		"n": clampf(float(raw_cell.get("n", 80.0)), 0.0, 100.0),
+		"p": clampf(float(raw_cell.get("p", 80.0)), 0.0, 100.0),
+		"k": clampf(float(raw_cell.get("k", 80.0)), 0.0, 100.0),
+		"npk_analyzed": bool(raw_cell.get("npk_analyzed", false)),
+		"fertility": float(raw_cell.get("fertility", 80.0)),
+		"fertilized": bool(raw_cell.get("fertilized", false)),
+		"waterlogged_days": maxi(0, int(raw_cell.get("waterlogged_days", 0))),
+		"grass_variant": int(raw_cell.get("grass_variant", (cx * 7 + cy * 13) % 3)),
+		"crop": crop_dict,
+	}
+	_sync_fertility(cell)
+	return cell
+
+
+func to_dict() -> Dictionary:
+	var serialized_cells: Array[Dictionary] = []
+	for cell: Dictionary in cells:
+		serialized_cells.append(_normalize_cell(cell, int(cell.get("x", 0)), int(cell.get("y", 0))))
+	return {
+		"width": width,
+		"height": height,
+		"energy": energy,
+		"max_energy": max_energy,
+		"coins": coins,
+		"cells": serialized_cells,
+	}
+
+
+func from_dict(data: Dictionary) -> void:
+	width = maxi(1, int(data.get("width", width)))
+	height = maxi(1, int(data.get("height", height)))
+	max_energy = maxi(1, int(data.get("max_energy", max_energy)))
+	energy = clampi(int(data.get("energy", max_energy)), 0, max_energy)
+	coins = int(data.get("coins", coins))
+
+	var expected_count: int = width * height
+	var raw_cells: Variant = data.get("cells", [])
+	if raw_cells is Array and (raw_cells as Array).size() == expected_count:
+		var arr: Array = raw_cells
+		cells.clear()
+		for idx: int in range(expected_count):
+			var fx: int = idx % width
+			var fy: int = idx / width
+			var entry: Variant = arr[idx]
+			if entry is Dictionary:
+				var entry_dict: Dictionary = entry
+				cells.append(_normalize_cell(entry_dict, fx, fy))
+			else:
+				cells.append(_make_default_cell(fx, fy))
+	else:
+		_init_cells()
+		if raw_cells is Array:
+			var arr: Array = raw_cells
+			for entry: Variant in arr:
+				if entry is Dictionary:
+					var entry_dict: Dictionary = entry
+					var cx: int = int(entry_dict.get("x", -1))
+					var cy: int = int(entry_dict.get("y", -1))
+					if is_valid(cx, cy):
+						cells[cy * width + cx] = _normalize_cell(entry_dict, cx, cy)
 
 
 func _sync_fertility(cell: Dictionary) -> void:
@@ -250,6 +346,7 @@ func plant_seed(x: int, y: int, crop_id: String) -> Dictionary:
 		"stress_reason": "",
 		"days_alive": 0,
 		"off_season_days": 0,
+		"days_ready": 0,
 	}
 	return {"ok": true, "energy_cost": 0, "crop_id": crop_id}
 
@@ -290,6 +387,7 @@ func clear_withered_or_harvest(x: int, y: int) -> Dictionary:
 		var regrow := float(def.get("regrow_days", 3))
 		crop["growth_days_acc"] = maxf(0.0, g_days - regrow)
 		crop["harvest_ready"] = false
+		crop["days_ready"] = 0
 		crop["stage"] = 3
 	else:
 		cell["crop"] = {}
@@ -390,6 +488,19 @@ func simulate_day_step(weather: Dictionary) -> Dictionary:
 		var crop_def: Dictionary = crops_db.get(str(crop["crop_id"]), {})
 		if crop_def.is_empty():
 			continue
+
+		if bool(crop.get("harvest_ready", false)):
+			var next_days_ready: int = int(crop.get("days_ready", 0)) + 1
+			crop["days_ready"] = next_days_ready
+			var max_ready: int = maxi(1, int(crop_def.get("overripe_days", 4)))
+			if next_days_ready >= max_ready:
+				crop["withered"] = true
+				crop["harvest_ready"] = false
+				crop["stage"] = 5
+				crop["health"] = 0.0
+				crop["stress_reason"] = "overripe"
+				summary["crops_withered"] = int(summary["crops_withered"]) + 1
+				continue
 
 		crop["days_alive"] = int(crop.get("days_alive", 0)) + 1
 

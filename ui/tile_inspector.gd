@@ -235,14 +235,18 @@ func inspect_cell(cell: Dictionary, sim: GridSimulation, tw: TimeWeatherManager)
 		var hp: int = int(round(float(crop["health"])))
 
 		if bool(crop.get("withered", false)):
-			_crop_label.text = "%s — SECCATA (tocca per pulire)" % c_name
+			if str(crop.get("stress_reason", "")) == "overripe":
+				_crop_label.text = "%s — APPASSITA (non raccolta in tempo, tocca per pulire)" % c_name
+			else:
+				_crop_label.text = "%s — SECCATA (tocca per pulire)" % c_name
 			_crop_label.add_theme_color_override("font_color", Color(0.95, 0.45, 0.40))
 		elif bool(crop.get("harvest_ready", false)):
+			var days_left: int = maxi(1, int(def.get("overripe_days", 4)) - int(crop.get("days_ready", 0)))
 			if bool(def.get("is_green_manure", false)):
-				_crop_label.text = "%s — MATURO! Usa la Vanga per interrarlo (+N/P/K)" % c_name
+				_crop_label.text = "%s — MATURO! Usa la Vanga entro %d gg (+N/P/K)" % [c_name, days_left]
 				_crop_label.add_theme_color_override("font_color", Color(0.56, 0.96, 0.52))
 			else:
-				_crop_label.text = "%s — PRONTA AL RACCOLTO! (100%%, Salute %d%%)" % [c_name, hp]
+				_crop_label.text = "%s — PRONTA! (raccogli entro %d gg)" % [c_name, days_left]
 				_crop_label.add_theme_color_override("font_color", Color(1.0, 0.90, 0.35))
 		else:
 			_crop_label.text = "%s — Crescita %d%% (%.1f/%.0f gg) | Salute %d%%" % [c_name, pct, acc, target, hp]

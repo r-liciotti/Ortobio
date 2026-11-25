@@ -181,9 +181,14 @@ Al posto di un semplice pulsante "Vendi", al Mercato del Villaggio gestisci una 
   - Ogni giorno ogni prodotto ha una domanda chiara: **Bassa (`0.75×`)**, **Normale (`1.0×`)**, **Alta (`1.3×`)**, **Richiestissimo (`1.6×` ▲)**.
   - Esporre/vendere sempre lo stesso prodotto in grandi quantità satura temporaneamente il villaggio (abbassandone il prezzo), premiando chi **ruota le colture (`N-P-K`)** e varia l'esposizione sulla bancarella!
   - *(Opzionale emergenza)* Il **Mercante all'ingrosso** può comunque ritirare merce istantaneamente a prezzo ridotto (`80%`) se ti servono monete al volo, ma **la tua Bancarella resta sempre il canale più redditizio**.
-- **Zaino / Magazzino (Semplice, niente equipaggiamento attrezzi):**
-  - Gli **attrezzi** (Vanga, Rastrello, Annaffiatoio, Sonda, ecc.) restano **sempre pronti nella barra `Lavora`** e si potenziano direttamente al Fabbro (`Vecchio → Ferro → Acciaio`) senza doverli spostare/equipaggiare nello Zaino.
-  - Lo **Zaino / Magazzino** conserva solo: **Semi**, **Raccolti** (1 solo slot pulito per prodotto), **Concimi/Accessori** e **Materiali** (Legna, Pietra, Fibre).
+- **Inventario stile *Minecraft* (Hotbar 6 Slot + Zaino):**
+  - **Hotbar da 6 Slot Rapidi** in basso (grandi e comodi col pollice): ci equipaggi gli attrezzi, i semi, i concimi o gli accessori che vuoi usare subito sul campo.
+  - **Zaino / Magazzino (`🎒`):** contiene tutti gli altri oggetti (altri attrezzi, semi, concimi, raccolti freschi con **Freschezza/Scadenza**, materiali); puoi spostare/scambiare rapidamente oggetti tra Zaino e Hotbar.
+- **Durabilità & Riparazione Attrezzi:**
+  - Ogni attrezzo (Vanga, Rastrello, Annaffiatoio, Sonda) ha una **durabilità** (visibile con micro-barra verde/gialla/rossa sullo slot) che scala con l'uso e dipende dal materiale (`Vecchio` < `Ferro` < `Acciaio`).
+  - Arrivato a `0` si **rompe** e non può essere usato finché non viene **riparato** (al Fabbro) o **ricomprato**.
+- **Movimento Libero del Contadino:**
+  - Il contadino può **camminare liberamente** verso qualsiasi punto toccato sul campo anche senza eseguire un'azione (non più legato solo a un'azione di lavoro).
 - **Cibo & Energia:** puoi mangiare i tuoi prodotti (o merende cucinate in Casa) per ricaricare energia durante la giornata.
 - **Anti-Soft-Lock:** se finisci con `0 €`, `0` semi e `0` raccolti, il Mercato offre gratuitamente un piccolo sacchetto di semi base di stagione (+ raccolta spontanea sui bordi del campo).
 
