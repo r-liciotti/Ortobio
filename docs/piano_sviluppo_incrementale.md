@@ -1,60 +1,90 @@
-# Piano di Sviluppo Incrementale (Partire Piccoli, Crescere Bene)
+# Piano di Sviluppo a Micro-Milestone (Versioni Piccole & Testabili)
 
-Per evitare di restare bloccati dalla mole di contenuti, costruiamo il gioco a **strati indipendenti**: ogni versione è già giocabile e testabile su telefono Android, permettendoci di calibrare **dimensione dei blocchi, scroll, tempi e bilanciamento** prima di aggiungere il pezzo successivo.
-
----
-
-## Le 5 Milestone Incrementali
+Invece di maxi-aggiornamenti rigidi, costruiamo **Ortobio** per **piccole micro-milestone mirate** (1–2 meccaniche alla volta). Ogni versione è subito giocabile in Godot 4, così possiamo testare ogni idea dal vivo e correggere liberamente design, bilanciamento o stile grafico prima di passare alla successiva.
 
 ```mermaid
 flowchart LR
-    M1["v0.1 · Prototipo Campo<br/>1 Campo + 3 Semi + Clima"] --> M2["v0.2 · Loop Completo<br/>Mappa + Casa + Mercato"]
-    M2 --> M3["v0.3 · Accessori & Alberi<br/>Irrigatori, Melo, Ulivo"]
-    M3 --> M4["v0.4 · Prima Fattoria<br/>Recinti + Galline + Compost"]
-    M4 --> M5["v0.5+ · Espansione<br/>Vigna, Mucca, Maiale, Arredo"]
+    A["Fase A (v0.1–v0.2)<br/>Campo, Avatar, N-P-K,<br/>Sonda & Rimedi Clima"] --> B["Fase B (v0.3)<br/>Zaino, Bancarella NPC,<br/>Mappa, Casa, Build & Villaggio"]
+    B --> C["Fase C (v0.4)<br/>Bonifica, Stagioni,<br/>Alberi & Fattoria #1"]
+    C --> D["Fase D (v0.5+)<br/>Locanda NPC, Sagre,<br/>Conserve/Vino/Olio & Casa Sims"]
 ```
-
-### Milestone 1 (`v0.1`) — Il Cuore dell'Orto *(Obiettivo: 1–2 settimane)*
-**Solo ciò che serve per capire se giocare in verticale è piacevole e qual è la dimensione ideale dei blocchi.**
-- **1 solo Campo** con griglia parametrica (es. partiamo da `10×25` o `10×40` per testare lo scroll e il touch su telefono).
-- **4 attrezzi:** Vanga, Rastrello, Annaffiatoio, Raccogli/Esplora.
-- **3 semi opposti** (da `crops.json`):
-  1. **Ravanello** (veloce, 4 gg, primavera).
-  2. **Pomodoro** (estivo, raccolta scalare, soffre il freddo).
-  3. **Cavolo Verza** (invernale, resiste al gelo).
-- **Motore Clima & Giorni:** Tasto "Dormi / Giorno Successivo" temporaneo + visualizzazione Temperatura, Stagione e crescita (inclusa la prova del fuori stagione!).
-- *Cosa verifichiamo in questa fase:* Grandezza dei tile sul telefono, comodità tra `Esplora` (scroll) e `Lavora` (drag), leggibilità dello stato della terra e delle piante.
-
-### Milestone 2 (`v0.2`) — Il Primo Gioco Completo
-- **Mappa Generale (Mini Pixel Art):** Schermata hub con 3 punti cliccabili (Casa, Campo #1, Mercato).
-- **Casa base:** Qui si trova il Letto per dormire e passare al giorno successivo.
-- **Mercato base:** Compri i semi e vendi i raccolti (prima economia funzionante).
-- **Salvataggio locale automatico** (JSON/file binario sul telefono) + **Almanacco v1** (solo scheda dei semi presenti e meteo).
-
-### Milestone 3 (`v0.3`) — Profondità Agricola & Arboricoltura
-- **Accessori da Campo (1×1):** Spaventapasseri, Irrigatore base, Telo TNT (per testare gli ingombri e i raggi d'azione).
-- **Primi 2 Alberi:** **Melo** e **Ulivo** (per testare l'ingombro `2×2` o `3×3` sulla griglia e la potatura invernale).
-- Espansione graduale del catalogo semi (da 3 a 10–12 colture) e introduzione erbacce/zappa.
-
-### Milestone 4 (`v0.4`) — La Fattoria e i Recinti
-- Sblocco sulla Mappa Generale della **Fattoria #1**.
-- **Sistema Recinti:** Disegno staccionate + calcolo automatico area interna + **Pollaio** + **Galline** + **Abbeveratoio/Mangiatoia**.
-- **Compostiera:** Collega Fattoria e Campo (letame → concime per l'orto).
-
-### Milestone 5 (`v0.5+`) — Contenuti Avanzati & Rifinitura
-- **Vigna** (filari + cantina), **Frantoio** (olio), **Api**, **Capre**, **Maiali**, **Mucche** e giochi per animali.
-- **Arredamento della Casa** (mobili comprabili al mercato).
-- **Nuovi Campi** acquistabili sulla Mappa Generale + ottimizzazione grafica, audio rilassante e polish Android.
 
 ---
 
-## Architettura Tecnica Leggera (Consigliata: Godot 4)
+## Fase A — Il Cuore Agronomico sul Campo
 
-Per mantenere tutto pulito e facilmente modificabile durante i test di bilanciamento:
+### `v0.1` — Prototipo Campo & Contadino *(Completata ✅)*
+- Campo verticale parametrico `10×30`, blocchi autotiled arrotondati 3D stile *Stardew Valley*, 3 colture opposte (`Ravanello`, `Pomodoro`, `Cavolo Verza`), clima senza stress mortale da caldo.
+- Contadino dettagliato `24×28` px con coda azioni e animazioni per strumento che partono all'arrivo sulla zolla.
 
-- **Struttura Cartelle Pulita:**
-  - `data/` → File JSON/Resource facilmente modificabili (`crops.json`, `accessories.json`, `animals.json`, `balance_config.json` con `grid_width`, `grid_height`, dimensioni blocchi).
-  - `core/` → Logica pura separata dalla grafica (`TimeWeatherManager`, `GridSimulation`, `EnclosureCalculator`, `EconomyManager`, `SaveManager`).
-  - `scenes/` → Le schermate singole (`WorldMap.tscn`, `FieldScreen.tscn`, `FarmScreen.tscn`, `HouseScreen.tscn`, `MarketScreen.tscn`).
-  - `ui/` → Componenti riutilizzabili (`TopBar`, `ToolDock`, `TileInspector`, `AlmanacSheet`).
-- **Perché separare `core/` da `scenes/`:** Puoi cambiare la grandezza della griglia, la grafica pixel art o gli ingombri di alberi e accessori in 30 secondi senza mai rompere la simulazione agronomica o i salvataggi.
+### `v0.2a` — Suolo Vivo (`N-P-K`), Produttività & Sonda Analisi Suolo *(Prossima)*
+- Simulazione `N / P / K` lenta e graduale su ogni zolla (3–5 raccolti prima di un calo visibile; nascosti di default finché non analizzi la zolla).
+- **Produttività reale in pezzi** (terra ricca = più ortaggi raccolti; terra povera = meno pezzi, mai morte).
+- Nuovo seme Legume (**Piselli**, rigenera `N`), primo **Concime Verde** (*Trifoglio*, interrabile con la Vanga per ricaricare `N-P-K`) e **Compost**.
+- Strumento **Sonda Analisi Suolo `Lv. 1`** (animazione del contadino + rivelazione barre `N/P/K` nell'Ispettore e vista cromatica sulle zolle analizzate).
+
+### `v0.2b` — Rimedi al Clima ("Problema → Rimedio") & Concimi Mirati
+- Modalità `Costruisci` sul Campo (`1×1`): **Telo TNT** e **Campana di Vetro** (proteggono dal gelo i Pomodori e piante sensibili) + **Irrigatore base (`3×3`)**.
+- **Concimi semplici per `N-P-K`**: *Concime Foglie (`N`)*, *Concime Radici (`P`)*, *Concime Frutti / Cenere (`K`)*.
+
+---
+
+## Fase B — Il Primo Gioco Completo (Mercato, Bancarella, Casa & Build)
+
+### `v0.3a` — Zaino (con Freschezza), Bancarella al Mercato & Domanda/Offerta
+- **Zaino / Magazzino** pulito (Semi, Raccolti con **Freschezza/Scadenza** → Scarti per Compost, Concimi, Materiali; attrezzi sempre pronti nella barra `Lavora`).
+- **La Tua Bancarella al Mercato:** postazione fisica con **Cassette di Legno** potenziabili (Banco `Lv. 1→4`: da 3 fino a 9 cassette; Cassette `Lv. 1→4`: da 6 fino a 20 prodotti) + **clienti NPC del villaggio** che passano e comprano secondo **Domanda & Offerta del giorno**.
+- Acquisto semi, vendita d'emergenza all'ingrosso (`80%`) e rete **anti-soft-lock**.
+
+### `v0.3b` — Mappa Generale, Casa Base, Riepilogo Serale & Salvataggio
+- **Mappa Generale** in mini-pixel art (Casa, Campo #1, Villaggio/Mercato).
+- **Casa base** con il nostro contadino, il **Letto** (schermata **Riepilogo Giornaliero** con incassi bancarella, XP e crescita notturna) e il **Barometro** (previsione meteo di domani).
+- **Salvataggio automatico locale** (`SaveManager`).
+
+### `v0.3c` — Build del Contadino (Punti Abilità) & Villaggio `Lv. 1 → Lv. 2`
+- **XP & Punti Abilità** spendibili a scelta nelle **6 caratteristiche** (*Agilità* movimento, *Destrezza* velocità azione, *Resistenza* energia, *Agronomia* produttività, *Selezione Semi*, *Commercio & Fattoria*) con **Talenti Speciali a Lv. 5**.
+- **Livello Villaggio (`Lv. 1 → Lv. 2`):** investimento in monete che apre **Bottega Agronomo** (Sonda, Telo TNT, concimi), **Fabbro Ferro**, **Falegname** e amplia la capacità del mercato (`+20%` domanda).
+
+### `v0.3d` — Bacheca Ordini, Eventi Randomici & Almanacco v1
+- **Bacheca Ordini settimanali** (zero penalità se scadono; ricompense variegate: `€`, XP, Compost, semi).
+- Primi **Eventi Randomici** (es. *Carovana dei Mercanti*, *Serata in Osteria*, *Rugiada Rigenerante*, *Settimana a Tema*).
+- **Almanacco v1** (schede colture, meteo oggi/domani, registro collezione).
+
+---
+
+## Fase C — Espansione Agricola, Stagioni & Fattoria
+
+### `v0.4a` — Bonifica del Campo, Piante Compagne & Polish Stagioni
+- Bonifica progressiva delle fasce incolte del campo (erba alta, rami, pietre → **Legna, Pietra, Fibre**).
+- Espansione catalogo a **10–12 colture** (incluse 1–2 **Piante Compagne** leggere e facoltative) + **stagioni visivamente molto più riconoscibili** (fiori primaverili, foglie cadenti in autunno, neve/brina in inverno).
+
+### `v0.4b` — Arboricoltura (Melo & Ulivo) & Traguardi della Valle (Bundle)
+- Primi alberi `2×2` (**Melo**, **Ulivo**) con potatura invernale, fioritura e raccolta.
+- **Traguardi della Valle** (cassette permanenti che sbloccano grandi agevolazioni).
+
+### `v0.4c` — Fattoria #1, Recinti & Pollaio (Circolarità)
+- Sblocco **Fattoria #1** sulla Mappa Generale: disegno staccionate + calcolo area interna (**flood-fill**), **Pollaio + Galline**, **Compostiera** (scarti + pollina → Compost!).
+- **Banco Fresco** sulla Bancarella per vendere Uova/Latticini.
+
+---
+
+## Fase D — Mid/Late-Game: Borgo Vivo, NPC, Raffinazione & Casa Stile *The Sims*
+
+### `v0.5a` — Villaggio `Lv. 3`, Locanda (1° NPC) & Sagra di Fine Stagione
+- **Locanda del Borgo** (reclutamento **1° NPC** in Mid-Game: *Bracciante Orto* oppure *Fattore*, con crescita esperienza nel tempo), **Mercante Ambulante** (semi rari/varietà antiche), **Campo #2**.
+- **Sagra / Fiera di Fine Stagione (Giorno 28)** con premio permanente **"Marchio del Borgo"** (`+10% / +20%` valore e richiesta del prodotto vincitore) e trofei per la Casa.
+
+### `v0.5b` — Raffinazione (Conserve, Olio EVO, Vino, Formaggi) & Villaggio `Lv. 4–5`
+- **Frantoio, Cantina & Conserve:** prodotti trasformati **senza scadenza** ad alto valore + **Scaffale Vasetti** e **Rastrelliera Bottiglie** (e predisposizione **Banco Specialità**) sulla Bancarella.
+- **Vigna a filari**, **Api**, **Capre, Maiali, Mucche**, **Sonda `Lv. 2` (`3×3`)**, **NPC Artigiano & Venditore Bancarella**.
+
+### `v0.5c` — Casa Stile *The Sims* Multi-Piano/Sotterranei, Serra Fredda & Polish Android
+- Editor a blocchi della Casa (stanze, mobili, piani `+1/+2`) e **Sotterranei (`-1` Cantina Vini/Olio, `-2` Conservazione fresca che prolunga la durata dei raccolti)**.
+- **Serra Fredda**, **Tunnel Basso**, **Irrigazione a Goccia**, polish audio/UI Android e preparazione pubblicazione Google Play.
+
+---
+
+## Architettura Tecnica (Godot 4)
+- `data/` → JSON parametrici (`balance_config.json`, `crops.json`, `village_levels.json`, `market_config.json`, ecc.).
+- `core/` → Simulazione pura disaccoppiata dalla grafica (`TimeWeatherManager`, `GridSimulation`, `InventoryManager`, `MarketStallManager`, `FarmerProgressManager`, `VillageManager`, `SaveManager`).
+- `scenes/` & `ui/` → Schermate singole (`WorldMap`, `FieldScreen`, `FarmScreen`, `MarketScreen`, `HouseScreen`) e componenti modulari (`TopBar`, `ToolDock`, `TileInspector`, `VerticalMinimap`, `AlmanacSheet`).

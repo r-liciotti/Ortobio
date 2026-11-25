@@ -211,24 +211,27 @@ Al posto di un semplice pulsante "Vendi", al Mercato del Villaggio gestisci una 
 
 ---
 
-## 7. Piano a Micro-Milestone (Piccole Versioni Testabili)
+## 7. Piano a Micro-Milestone (Sintesi — Dettaglio in `piano_sviluppo_incrementale.md`)
 
-Ogni micro-milestone introduce **1–2 idee concrete**, si testa subito in Godot e lascia spazio per rifinire grafica o cambiare idea prima della successiva:
+Ogni micro-milestone testa **1–2 meccaniche concrete** in Godot prima di aggiungere la successiva:
 
-- **`v0.1` *(Fatta)*:** Campo verticale `10×30`, blocchi autotiled arrotondati 3D, 3 semi opposti, contadino animato 24×28 con coda azioni.
-- **`v0.2a` — Suolo Vivo (`N-P-K`), Produttività & Sonda Analisi Suolo:**
-  - [x] Simulazione `N / P / K` lenta e graduale su ogni zolla (consumo mirato su 3–5 raccolti) + 1 legume di test (**Piselli**, rigenera `N`) + **Compost**.
-  - [x] **Produttività reale in pezzi** (zolla ricca = più ortaggi raccolti; zolla povera = meno pezzi, mai morte).
-  - [x] `N-P-K` nascosti di default → strumento sbloccabile **Sonda Analisi Suolo** per analizzare le zolle e rivelare i valori (con toggle di test in `v0.2a` per provarla subito).
-- **`v0.2b` — Rimedi al Clima (Test "Problema → Rimedio"):**
-  - [x] Primo accessorio protettivo (**Telo TNT** contro il gelo per salvare i Pomodori fuori stagione) + **Irrigatore base** (test posizionamento accessori `1×1` sul campo).
-- **`v0.2c` — Zaino (con Freschezza), Bancarella al Mercato (Cassette + NPC Clienti), Livelli Villaggio & Riepilogo Serale:**
-  - [ ] Raccolti nello **Zaino** (quantità scalata sulla produttività `N-P-K` + freschezza), **Bancarella personale al Mercato** (cassette potenziabili + clienti NPC che comprano secondo **Domanda & Offerta**), **Livelli del Villaggio**, **Riepilogo Giornaliero** e **Salvataggio locale**.
-- **`v0.2d` — Punti Abilità Contadino, Mappa Generale, Casa Base & Obiettivi v1:**
-  - [ ] **XP & Punti Abilità del Contadino** spendibili (Agilità movimento, Destrezza azione, Resistenza energia, Pollice Verde, Mestiere).
-  - [ ] **Mappa Generale** (mini-pixel art: Casa, Campo #1, Villaggio/Mercato), **Casa base** con Letto, **Bacheca Ordini** settimanali e **Almanacco v1** (con meteo di domani).
-- **`v0.3+` — Espansione & Polish Continuo:**
-  - [ ] Bonifica campo (Legna/Pietra/Fibre), **Traguardi della Valle (Bundle)**, primi alberi (**Melo**, **Ulivo**), stagioni più riconoscibili visivamente, poi **Fattoria/Animali** e **Casa stile *The Sims*** multi-piano + sotterranei.
+- **Fase A (Campo & Agronomia):**
+  - `v0.1` *(Completata ✅)*: Campo `10×30`, blocchi arrotondati 3D, 3 semi, contadino animato `24×28` con coda azioni.
+  - `v0.2a`: **`N-P-K` lenti** (nascosti di default) + **Produttività in pezzi** + **Piselli** + **Concime Verde (Trifoglio)** + **Compost** + **Sonda Analisi Suolo `Lv. 1`**.
+  - `v0.2b`: **Rimedi Clima** (`Telo TNT`, `Campana di Vetro`, `Irrigatore 3×3`) + **Concimi semplici `N/P/K`**.
+- **Fase B (Loop Completo & Progressione):**
+  - `v0.3a`: **Zaino con Freschezza** + **Bancarella al Mercato** (Cassette potenziabili + Clienti NPC + **Domanda/Offerta**).
+  - `v0.3b`: **Mappa Generale** + **Casa base** (Letto, **Riepilogo Serale**, Barometro) + **Salvataggio locale**.
+  - `v0.3c`: **Build Contadino** (6 caratteristiche + Talenti Lv. 5) + **Villaggio `Lv. 1 → Lv. 2`**.
+  - `v0.3d`: **Bacheca Ordini** + **Eventi Randomici** + **Almanacco v1**.
+- **Fase C (Espansione & Fattoria):**
+  - `v0.4a`: Bonifica Campo (Legna/Pietra/Fibre) + 10–12 colture (Piante Compagne) + **Polish visivo Stagioni**.
+  - `v0.4b`: Alberi `2×2` (**Melo**, **Ulivo**) + **Traguardi della Valle (Bundle)**.
+  - `v0.4c`: **Fattoria #1** (Recinti flood-fill, Pollaio, Galline, Compostiera) + **Banco Fresco** in Bancarella.
+- **Fase D (Mid/Late-Game):**
+  - `v0.5a`: **Villaggio `Lv. 3`** + **Locanda (1° NPC)** + Mercante Ambulante + **Sagra Fine Stagione (`Marchio del Borgo`)**.
+  - `v0.5b`: **Conserve / Olio EVO / Vino / Formaggi** (senza scadenza!) + nuove Cassette Bancarella + Vigna & Animali avanzati (`Lv. 4–5`).
+  - `v0.5c`: **Casa stile *The Sims* multi-piano + Sotterranei (`-1/-2`)** + Serra Fredda + polish Android.
 
 ---
 
